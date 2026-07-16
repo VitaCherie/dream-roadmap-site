@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="Dream Roadmap" />
+<meta name="theme-color" content="#efe7d9" />
+<link rel="manifest" href="manifest.json" />
+<link rel="apple-touch-icon" href="icon-192.png" />
+<title>Dream Ecosystem Roadmap</title>
+<style>
+  :root {
+    --bg: #efe7d9;
+    --surface-1: #faf6ef;
+    --surface-2: #f2ebdd;
+    --border: #e3d8c5;
+    --border-strong: #cbb994;
+    --text-primary: #332e26;
+    --text-secondary: #6b6255;
+    --text-muted: #948a79;
+    --accent: #c0653c;
+    --accent-soft: #f0dcd0;
+    --accent-dark: #8f3f22;
+    --wheel-dormant-fill: #d9d4c7;
+    --wheel-dormant-stroke: #b7b09b;
+    --radius: 10px;
+    --shadow: 0 1px 2px rgba(51,46,38,0.04), 0 4px 16px rgba(51,46,38,0.05);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    padding: max(env(safe-area-inset-top), 18px) 16px calc(env(safe-area-inset-bottom) + 40px);
+    -webkit-font-smoothing: antialiased; line-height: 1.4;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 20px; margin: 2px 0 4px; font-weight: 650; letter-spacing: -0.2px; }
+  .subtitle { color: var(--text-secondary); font-size: 13.5px; margin: 0 0 20px; line-height: 1.5; }
+  .ms-item { padding: 10px 0; border-top: 0.5px solid var(--border); }
+  .ms-tag { font-size: 12px; color: var(--text-muted); margin: 0; }
+  .ms-title { font-size: 14px; font-weight: 600; margin: 2px 0; }
+  .ms-detail { font-size: 13px; color: var(--text-secondary); margin: 0; }
+  .phase-heading { font-size: 13px; font-weight: 600; color: var(--accent-dark); margin: 1rem 0 0; text-transform: uppercase; letter-spacing: 0.4px; }
+  .metric { background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; box-shadow: var(--shadow); margin: 1rem 0 1.25rem; }
+  .metric p:first-child { font-size: 13px; color: var(--text-secondary); margin: 0 0 4px; }
+  .metric p:last-child { font-size: 28px; font-weight: 650; margin: 0; color: var(--accent-dark); }
+  .coming-next { margin-top: 1.5rem; border: 1px dashed var(--border-strong); border-radius: 12px; padding: 1rem 1.25rem; background: var(--surface-2); }
+  .coming-next p { font-size: 14px; font-weight: 600; margin: 0 0 8px; }
+  .coming-next ul { margin: 0; padding-left: 18px; font-size: 13px; color: var(--text-secondary); line-height: 1.7; }
+  footer { text-align: center; color: var(--text-muted); font-size: 11px; margin-top: 22px; }
+  footer a { color: var(--text-muted); text-decoration: underline; cursor: pointer; }
+
+  /* Password gate */
+  .gate { max-width: 340px; margin: 12vh auto 0; text-align: center; }
+  .gate .lock { font-size: 34px; }
+  .gate h2 { font-size: 18px; margin: 12px 0 4px; }
+  .gate p { color: var(--text-secondary); font-size: 13px; margin: 0 0 18px; line-height: 1.5; }
+  .gate input[type="password"] { width: 100%; padding: 13px 14px; font-size: 15px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface-1); color: var(--text-primary); box-shadow: var(--shadow); }
+  .gate input[type="password"]:focus { outline: none; border-color: var(--accent); }
+  .gate input[type="checkbox"] { width: 15px; height: 15px; accent-color: var(--accent); }
+  .gate button { width: 100%; margin-top: 10px; padding: 13px; font-size: 15px; font-weight: 600; color: #fff; background: var(--accent); border: none; border-radius: 12px; cursor: pointer; }
+  .gate button:active { transform: scale(0.98); }
+  .gate .err { color: #a53a24; font-size: 13px; margin-top: 12px; min-height: 16px; }
+  .gate label { display: flex; gap: 7px; align-items: center; justify-content: center; margin-top: 14px; font-size: 12px; color: var(--text-muted); cursor: pointer; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div id="app"><p style="color:var(--text-muted)">Loading roadmap...</p></div>
+  <footer id="foot"></footer>
+</div>
+
+<script>
+const el = (t, c, h) => { const e = document.createElement(t); if (c) e.className = c; if (h != null) e.innerHTML = h; return e; };
+const esc = s => (s || "").replace(/[&<>"]/g, m => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[m]));
+const svgns = "http://www.w3.org/2000/svg";
+
+const WEDGES = [
+  {key:'portfolio', d:'M254.4,322.2 L92.7,269.7 A260,260 0 0,1 340,90 L340,260 A90,90 0 0,0 254.4,322.2 Z', lx:237, ly:208},
+  {key:'tools',     d:'M340,260 L340,90 A260,260 0 0,1 587.3,269.7 L425.6,322.2 A90,90 0 0,0 340,260 Z',   lx:443, ly:208},
+  {key:'media',     d:'M425.6,322.2 L587.3,269.7 A260,260 0 0,1 492.9,560.3 L392.9,422.8 A90,90 0 0,0 425.6,322.2 Z', lx:506, ly:404},
+  {key:'funding',   d:'M392.9,422.8 L492.9,560.3 A260,260 0 0,1 187.1,560.3 L287.1,422.8 A90,90 0 0,0 392.9,422.8 Z', lx:340, ly:525},
+  {key:'spaces',    d:'M287.1,422.8 L187.1,560.3 A260,260 0 0,1 92.7,269.7 L254.4,322.2 A90,90 0 0,0 287.1,422.8 Z',  lx:174, ly:404}
+];
+
+const RAMPS = {
+  accent: {fill:'#f0dcd0', stroke:'#c0653c', title:'#8f3f22', sub:'#a5522f'}
+};
+
+let DATA = null;
+
+function buildWheel(container, data) {
+  container.innerHTML = "";
+  const nStops = data.phases.length;
+
+  // ---- Timeline ----
+  const phaseLabel = el("p", null, "Phase 1 (" + data.phases[0].range + ")");
+  phaseLabel.style.cssText = "font-size:14px;font-weight:600;margin:0 0 4px";
+  container.appendChild(phaseLabel);
+
+  const tlSvg = document.createElementNS(svgns, "svg");
+  tlSvg.setAttribute("width", "100%"); tlSvg.setAttribute("viewBox", "0 0 680 90");
+  tlSvg.style.cssText = "cursor:pointer;touch-action:none";
+  const baseline = document.createElementNS(svgns, "line");
+  baseline.setAttribute("x1","60"); baseline.setAttribute("y1","40"); baseline.setAttribute("x2","620"); baseline.setAttribute("y2","40");
+  baseline.setAttribute("stroke","var(--border)"); baseline.setAttribute("stroke-width","2");
+  tlSvg.appendChild(baseline);
+  const progress = document.createElementNS(svgns, "line");
+  progress.setAttribute("id","tl-progress"); progress.setAttribute("x1","60"); progress.setAttribute("y1","40"); progress.setAttribute("x2","60"); progress.setAttribute("y2","40");
+  progress.setAttribute("stroke", RAMPS.accent.stroke); progress.setAttribute("stroke-width","2");
+  tlSvg.appendChild(progress);
+  const step = 560 / (nStops - 1);
+  data.phases.forEach((p, idx) => {
+    const x = 60 + idx * step;
+    const c = document.createElementNS(svgns, "circle");
+    c.setAttribute("id","stop-"+p.phase); c.setAttribute("cx", x); c.setAttribute("cy", 40); c.setAttribute("r", 7);
+    const t = document.createElementNS(svgns, "text");
+    t.setAttribute("x", x); t.setAttribute("y", 66); t.setAttribute("text-anchor","middle");
+    t.setAttribute("style","font-size:11px;fill:var(--text-muted)"); t.textContent = p.range;
+    tlSvg.appendChild(c); tlSvg.appendChild(t);
+  });
+  container.appendChild(tlSvg);
+
+  // ---- Metric ----
+  const metric = el("div","metric");
+  metric.appendChild(el("p",null,"Ecosystem complete"));
+  metric.appendChild(el("p",null,"0%"));
+  metric.lastChild.id = "ecoPct";
+  container.appendChild(metric);
+
+  // ---- Wheel ----
+  const wheelSvg = document.createElementNS(svgns, "svg");
+  wheelSvg.setAttribute("width","100%"); wheelSvg.setAttribute("viewBox","0 0 680 630");
+
+  const defs = document.createElementNS(svgns, "defs");
+  const pattern = document.createElementNS(svgns, "pattern");
+  pattern.setAttribute("id","hatch-accent"); pattern.setAttribute("width","7"); pattern.setAttribute("height","7");
+  pattern.setAttribute("patternUnits","userSpaceOnUse"); pattern.setAttribute("patternTransform","rotate(45)");
+  const hatchBg = document.createElementNS(svgns, "rect");
+  hatchBg.setAttribute("width","7"); hatchBg.setAttribute("height","7"); hatchBg.setAttribute("fill","#f0dcd0");
+  const hatchLine = document.createElementNS(svgns, "line");
+  hatchLine.setAttribute("x1","0"); hatchLine.setAttribute("y1","0"); hatchLine.setAttribute("x2","0"); hatchLine.setAttribute("y2","7");
+  hatchLine.setAttribute("stroke","#c0653c"); hatchLine.setAttribute("stroke-width","3");
+  pattern.appendChild(hatchBg); pattern.appendChild(hatchLine);
+  defs.appendChild(pattern);
+  wheelSvg.appendChild(defs);
+
+  WEDGES.forEach(w => {
+    const base = document.createElementNS(svgns,"path");
+    base.setAttribute("d", w.d); base.setAttribute("fill","var(--wheel-dormant-fill)"); base.setAttribute("stroke","var(--wheel-dormant-stroke)"); base.setAttribute("stroke-width","0.5");
+    wheelSvg.appendChild(base);
+  });
+  WEDGES.forEach(w => {
+    const ov = document.createElementNS(svgns,"path");
+    ov.setAttribute("id","ov-"+w.key); ov.setAttribute("d", w.d); ov.setAttribute("fill","none"); ov.setAttribute("stroke","none"); ov.setAttribute("stroke-width","1");
+    ov.style.cssText = "opacity:0;transition:opacity .4s";
+    wheelSvg.appendChild(ov);
+  });
+
+  // Hub
+  const hubBase = document.createElementNS(svgns,"circle");
+  hubBase.setAttribute("cx","340"); hubBase.setAttribute("cy","350"); hubBase.setAttribute("r","90");
+  hubBase.setAttribute("fill","var(--wheel-dormant-fill)"); hubBase.setAttribute("stroke","var(--wheel-dormant-stroke)"); hubBase.setAttribute("stroke-width","0.5");
+  wheelSvg.appendChild(hubBase);
+  const hubOv = document.createElementNS(svgns,"circle");
+  hubOv.setAttribute("id","ov-hub"); hubOv.setAttribute("cx","340"); hubOv.setAttribute("cy","350"); hubOv.setAttribute("r","90");
+  hubOv.setAttribute("fill","none"); hubOv.setAttribute("stroke","none");
+  hubOv.style.cssText = "opacity:0;transition:opacity .4s";
+  wheelSvg.appendChild(hubOv);
+  const hubTitle = document.createElementNS(svgns,"text");
+  hubTitle.setAttribute("id","hub-title"); hubTitle.setAttribute("x","340"); hubTitle.setAttribute("y","342");
+  hubTitle.setAttribute("text-anchor","middle"); hubTitle.setAttribute("dominant-baseline","central");
+  hubTitle.style.cssText = "font-size:14px;font-weight:600;fill:var(--text-secondary)";
+  hubTitle.textContent = data.hub.label;
+  wheelSvg.appendChild(hubTitle);
+  const hubSub = document.createElementNS(svgns,"text");
+  hubSub.setAttribute("id","hub-sub"); hubSub.setAttribute("x","340"); hubSub.setAttribute("y","364");
+  hubSub.setAttribute("text-anchor","middle"); hubSub.setAttribute("dominant-baseline","central");
+  hubSub.style.cssText = "font-size:12px;fill:var(--text-secondary)";
+  hubSub.textContent = data.hub.subBefore;
+  wheelSvg.appendChild(hubSub);
+
+  // Division labels
+  WEDGES.forEach(w => {
+    const div = data.divisions[w.key];
+    const hasSub = !!div.sub;
+    const title = document.createElementNS(svgns,"text");
+    title.setAttribute("id", w.key+"-title"); title.setAttribute("x", w.lx); title.setAttribute("y", hasSub ? w.ly-11 : w.ly);
+    title.setAttribute("text-anchor","middle"); title.setAttribute("dominant-baseline","central");
+    title.style.cssText = "font-size:14px;font-weight:600;fill:var(--text-secondary)";
+    title.textContent = div.label;
+    wheelSvg.appendChild(title);
+    const sub = document.createElementNS(svgns,"text");
+    sub.setAttribute("id", w.key+"-sub"); sub.setAttribute("x", w.lx); sub.setAttribute("y", w.ly+11);
+    sub.setAttribute("text-anchor","middle"); sub.setAttribute("dominant-baseline","central");
+    sub.style.cssText = "font-size:12px;fill:var(--text-secondary)";
+    sub.textContent = div.sub || "";
+    wheelSvg.appendChild(sub);
+  });
+
+  container.appendChild(wheelSvg);
+
+  // ---- Milestone panel ----
+  const msPanel = el("div"); msPanel.id = "msPanel"; msPanel.style.marginTop = "0.5rem";
+  container.appendChild(msPanel);
+
+  // ---- Coming next (phase 4 only) ----
+  const cn = el("div","coming-next");
+  cn.id = "comingNext";
+  cn.style.display = "none";
+  cn.appendChild(el("p",null,"Coming next (year 2 and beyond)"));
+  const ul = el("ul");
+  data.comingNext.forEach(item => ul.appendChild(el("li", null, esc(item))));
+  cn.appendChild(ul);
+  container.appendChild(cn);
+
+  // ---- Behaviour ----
+  function setSector(key, state, ramp) {
+    const ov = document.getElementById("ov-"+key);
+    const title = document.getElementById(key+"-title");
+    const sub = document.getElementById(key+"-sub");
+    if (state === "complete") {
+      ov.style.fill = ramp.fill; ov.style.stroke = ramp.stroke; ov.style.opacity = "1";
+      title.style.fill = ramp.title; sub.style.fill = ramp.sub;
+    } else if (state === "progress") {
+      ov.style.fill = "url(#hatch-accent)"; ov.style.stroke = ramp.stroke; ov.style.opacity = "1";
+      title.style.fill = ramp.stroke; sub.style.fill = "var(--text-secondary)";
+    } else {
+      ov.style.fill = "none"; ov.style.stroke = "none"; ov.style.opacity = "0";
+      title.style.fill = "var(--text-secondary)"; sub.style.fill = "var(--text-secondary)";
+    }
+  }
+
+  function renderTimeline(phase) {
+    data.phases.forEach((p, idx) => {
+      const c = document.getElementById("stop-"+p.phase);
+      if (p.phase < phase) { c.setAttribute("r","7"); c.setAttribute("fill", RAMPS.accent.stroke); c.setAttribute("stroke", RAMPS.accent.stroke); c.setAttribute("stroke-width","1"); }
+      else if (p.phase === phase) { c.setAttribute("r","10"); c.setAttribute("fill", RAMPS.accent.fill); c.setAttribute("stroke", RAMPS.accent.stroke); c.setAttribute("stroke-width","2"); }
+      else { c.setAttribute("r","7"); c.setAttribute("fill","var(--surface-2)"); c.setAttribute("stroke","var(--border-strong)"); c.setAttribute("stroke-width","1"); }
+    });
+    document.getElementById("tl-progress").setAttribute("x2", 60 + (phase-1) * step);
+  }
+
+  const totalItems = data.phases.reduce((sum, p) => sum + p.items.length, 0);
+
+  function setPhase(phase) {
+    phase = Math.min(nStops, Math.max(1, Math.round(phase)));
+    const p = data.phases[phase-1];
+    phaseLabel.textContent = "Phase " + phase + " (" + p.range + ")";
+    Object.keys(data.divisions).forEach(key => {
+      const div = data.divisions[key];
+      let state = "dormant";
+      if (phase >= div.threshold) state = "complete";
+      else if (div.progressAt && phase >= div.progressAt) state = "progress";
+      setSector(key, state, RAMPS[div.style]);
+    });
+    const itemsSoFar = data.phases.slice(0, phase).reduce((sum, ph) => sum + ph.items.length, 0);
+    document.getElementById("ecoPct").textContent = Math.round(itemsSoFar/totalItems*100) + "%";
+    setSector("hub", phase >= data.hub.threshold ? "complete" : "dormant", RAMPS.accent);
+    document.getElementById("hub-sub").textContent = phase >= data.hub.osThreshold ? data.hub.subAfter : data.hub.subBefore;
+
+    msPanel.innerHTML = p.items.map(ms =>
+      '<div class="ms-item"><p class="ms-tag">' + esc(data.divLabel[ms.tag]) + '</p><p class="ms-title">' + esc(ms.title) + '</p><p class="ms-detail">' + esc(ms.detail) + '</p></div>'
+    ).join("");
+
+    document.getElementById("comingNext").style.display = (phase === nStops) ? "block" : "none";
+
+    renderTimeline(phase);
+  }
+
+  let dragging = false;
+  function xToPhase(clientX) {
+    const rect = tlSvg.getBoundingClientRect();
+    const scale = 680 / rect.width;
+    const x = (clientX - rect.left) * scale;
+    return 1 + (x - 60) / step;
+  }
+  tlSvg.addEventListener("pointerdown", e => { dragging = true; tlSvg.setPointerCapture(e.pointerId); setPhase(xToPhase(e.clientX)); });
+  tlSvg.addEventListener("pointermove", e => { if (dragging) setPhase(xToPhase(e.clientX)); });
+  tlSvg.addEventListener("pointerup", () => { dragging = false; });
+  tlSvg.addEventListener("pointercancel", () => { dragging = false; });
+
+  setPhase(1);
+}
+
+function render(data) {
+  DATA = data;
+  const app = document.getElementById("app");
+  app.innerHTML = "";
+  app.appendChild(el("h1", null, "Dream ecosystem roadmap"));
+  app.appendChild(el("p", "subtitle", "Drag the timeline to see the ecosystem wheel fill in as each phase lands."));
+  const wheelHost = el("div");
+  app.appendChild(wheelHost);
+  buildWheel(wheelHost, data);
+
+  const when = data.generatedAt ? new Date(data.generatedAt).toLocaleDateString() : "";
+  document.getElementById("foot").textContent = when ? "Roadmap as of " + when : "";
+}
+
+/* ---------- Decryption (in-browser, password never leaves the device) ---------- */
+const PW_KEY = "dream_roadmap_pw";
+async function decryptRoadmap(enc, password) {
+  const dec = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+  const baseKey = await crypto.subtle.importKey("raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveKey"]);
+  const key = await crypto.subtle.deriveKey(
+    { name: "PBKDF2", salt: dec(enc.salt), iterations: enc.iter, hash: "SHA-256" },
+    baseKey, { name: "AES-GCM", length: 256 }, false, ["decrypt"]
+  );
+  const buf = await crypto.subtle.decrypt({ name: "AES-GCM", iv: dec(enc.iv) }, key, dec(enc.ct));
+  return JSON.parse(new TextDecoder().decode(buf));
+}
+
+function showError(msg) {
+  document.getElementById("app").innerHTML = '<p style="color:#a53a24">' + esc(msg) + '</p>';
+}
+
+function showGate(enc) {
+  const app = document.getElementById("app");
+  app.innerHTML = "";
+  const g = el("div", "gate");
+  g.appendChild(el("div", "lock", "🔒"));
+  g.appendChild(el("h2", null, "Dream ecosystem roadmap"));
+  g.appendChild(el("p", null, "Enter the password to unlock the roadmap. It decrypts on this device only."));
+  const input = el("input");
+  input.type = "password"; input.placeholder = "Password"; input.autocomplete = "current-password";
+  const btn = el("button", null, "Unlock");
+  const err = el("div", "err");
+  const remember = el("input"); remember.type = "checkbox"; remember.checked = true;
+  const rememberLabel = el("label"); rememberLabel.appendChild(remember); rememberLabel.appendChild(document.createTextNode("Remember on this device"));
+  g.appendChild(input); g.appendChild(btn); g.appendChild(err); g.appendChild(rememberLabel);
+  app.appendChild(g);
+  input.focus();
+
+  const attempt = async () => {
+    err.textContent = ""; btn.textContent = "Unlocking...";
+    try {
+      const d = await decryptRoadmap(enc, input.value);
+      if (remember.checked) localStorage.setItem(PW_KEY, input.value);
+      render(d);
+      const foot = document.getElementById("foot");
+      foot.innerHTML = (foot.textContent ? foot.textContent + " · " : "") + '<a id="lockLink">Lock</a>';
+      document.getElementById("lockLink").addEventListener("click", () => { localStorage.removeItem(PW_KEY); location.reload(); });
+    } catch (e) {
+      btn.textContent = "Unlock";
+      err.textContent = "Wrong password, try again.";
+      input.select();
+    }
+  };
+  btn.addEventListener("click", attempt);
+  input.addEventListener("keydown", e => { if (e.key === "Enter") attempt(); });
+}
+
+async function boot() {
+  let enc;
+  try {
+    enc = await fetch("data/roadmap.enc.json?v=" + Date.now()).then(r => { if (!r.ok) throw new Error(); return r.json(); });
+  } catch (e) {
+    showError("Could not load the roadmap data. It may not have been published yet.");
+    return;
+  }
+  const saved = localStorage.getItem(PW_KEY);
+  if (saved) {
+    try {
+      render(await decryptRoadmap(enc, saved));
+      const foot = document.getElementById("foot");
+      foot.innerHTML = (foot.textContent ? foot.textContent + " · " : "") + '<a id="lockLink">Lock</a>';
+      document.getElementById("lockLink").addEventListener("click", () => { localStorage.removeItem(PW_KEY); location.reload(); });
+      return;
+    } catch (e) { localStorage.removeItem(PW_KEY); }
+  }
+  showGate(enc);
+}
+boot();
+
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
+</script>
+</body>
+</html>
