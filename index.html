@@ -35,18 +35,39 @@
     padding: max(env(safe-area-inset-top), 18px) 16px calc(env(safe-area-inset-bottom) + 40px);
     -webkit-font-smoothing: antialiased; line-height: 1.4;
   }
-  .wrap { max-width: 720px; margin: 0 auto; }
+  .wrap { max-width: 1160px; margin: 0 auto; }
   h1 { font-size: 20px; margin: 2px 0 4px; font-weight: 650; letter-spacing: -0.2px; }
-  .subtitle { color: var(--text-secondary); font-size: 13.5px; margin: 0 0 20px; line-height: 1.5; }
-  .ms-item { padding: 10px 0; border-top: 0.5px solid var(--border); }
-  .ms-tag { font-size: 12px; color: var(--text-muted); margin: 0; }
-  .ms-title { font-size: 14px; font-weight: 600; margin: 2px 0; }
-  .ms-detail { font-size: 13px; color: var(--text-secondary); margin: 0; }
-  .phase-heading { font-size: 13px; font-weight: 600; color: var(--accent-dark); margin: 1rem 0 0; text-transform: uppercase; letter-spacing: 0.4px; }
-  .metric { background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; box-shadow: var(--shadow); margin: 1rem 0 1.25rem; }
-  .metric p:first-child { font-size: 13px; color: var(--text-secondary); margin: 0 0 4px; }
-  .metric p:last-child { font-size: 28px; font-weight: 650; margin: 0; color: var(--accent-dark); }
-  .coming-next { margin-top: 1.5rem; border: 1px dashed var(--border-strong); border-radius: 12px; padding: 1rem 1.25rem; background: var(--surface-2); }
+  .subtitle { color: var(--text-secondary); font-size: 13.5px; margin: 0 0 16px; line-height: 1.5; }
+
+  .top-bar { max-width: 640px; }
+
+  .metric { background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--radius); padding: 0.85rem 1rem; box-shadow: var(--shadow); margin: 0.75rem 0 1.1rem; transition: background .4s, color .4s; }
+  .metric p:first-child { font-size: 13px; color: var(--text-secondary); margin: 0 0 4px; transition: color .4s; }
+  .metric p:last-child { font-size: 28px; font-weight: 650; margin: 0; color: var(--accent-dark); transition: color .4s; }
+  .metric.complete { background: var(--accent); }
+  .metric.complete p:first-child { color: #fbe9df; }
+  .metric.complete p:last-child { color: #ffffff; }
+
+  .final-banner { display: none; background: var(--accent-dark); color: #fff; border-radius: 14px; padding: 18px 22px; margin: 0 0 1.25rem; text-align: center; box-shadow: var(--shadow); }
+  .final-banner.show { display: block; }
+  .final-banner .big { font-size: 19px; font-weight: 700; margin: 0 0 4px; letter-spacing: -0.2px; }
+  .final-banner .small { font-size: 13px; margin: 0; opacity: 0.88; }
+
+  .main-row { display: grid; grid-template-columns: minmax(300px, 460px) 1fr; gap: 28px; align-items: start; }
+  @media (max-width: 860px) { .main-row { grid-template-columns: 1fr; } .list-col { max-height: none !important; overflow: visible !important; } }
+  .list-col { max-height: 640px; overflow-y: auto; padding-right: 4px; }
+  .wheel-col svg { transition: filter .5s; }
+  .wheel-col.complete svg { filter: drop-shadow(0 0 20px rgba(192,101,60,0.5)); }
+
+  .deliverables-heading { display: flex; align-items: baseline; justify-content: space-between; margin: 0 0 12px; }
+  .deliverables-heading span:first-child { font-size: 13px; font-weight: 700; color: var(--accent-dark); text-transform: uppercase; letter-spacing: 0.6px; }
+  .deliverables-heading span:last-child { font-size: 12px; color: var(--text-muted); }
+  .ms-item { background: var(--surface-1); border-left: 3px solid var(--accent); border-radius: 8px; padding: 12px 14px; margin-bottom: 10px; box-shadow: var(--shadow); }
+  .ms-tag { display: inline-block; font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: var(--accent-dark); background: var(--accent-soft); padding: 2px 8px; border-radius: 20px; margin: 0 0 6px; }
+  .ms-title { font-size: 15px; font-weight: 700; margin: 0 0 3px; }
+  .ms-detail { font-size: 13.5px; color: var(--text-secondary); margin: 0; line-height: 1.5; }
+
+  .coming-next { margin-top: 0.5rem; border: 1px dashed var(--border-strong); border-radius: 12px; padding: 1rem 1.25rem; background: var(--surface-2); }
   .coming-next p { font-size: 14px; font-weight: 600; margin: 0 0 8px; }
   .coming-next ul { margin: 0; padding-left: 18px; font-size: 13px; color: var(--text-secondary); line-height: 1.7; }
   footer { text-align: center; color: var(--text-muted); font-size: 11px; margin-top: 22px; }
@@ -95,10 +116,13 @@ function buildWheel(container, data) {
   container.innerHTML = "";
   const nStops = data.phases.length;
 
+  const topBar = el("div", "top-bar");
+  container.appendChild(topBar);
+
   // ---- Timeline ----
   const phaseLabel = el("p", null, "Phase 1 (" + data.phases[0].range + ")");
   phaseLabel.style.cssText = "font-size:14px;font-weight:600;margin:0 0 4px";
-  container.appendChild(phaseLabel);
+  topBar.appendChild(phaseLabel);
 
   const tlSvg = document.createElementNS(svgns, "svg");
   tlSvg.setAttribute("width", "100%"); tlSvg.setAttribute("viewBox", "0 0 680 90");
@@ -121,14 +145,30 @@ function buildWheel(container, data) {
     t.setAttribute("style","font-size:11px;fill:var(--text-muted)"); t.textContent = p.range;
     tlSvg.appendChild(c); tlSvg.appendChild(t);
   });
-  container.appendChild(tlSvg);
+  topBar.appendChild(tlSvg);
 
   // ---- Metric ----
   const metric = el("div","metric");
+  metric.id = "metricCard";
   metric.appendChild(el("p",null,"Ecosystem complete"));
   metric.appendChild(el("p",null,"0%"));
   metric.lastChild.id = "ecoPct";
-  container.appendChild(metric);
+  topBar.appendChild(metric);
+
+  // ---- Final-stage emotional moment ----
+  const finalBanner = el("div", "final-banner");
+  finalBanner.id = "finalBanner";
+  finalBanner.appendChild(el("p", "big", "The Dream ecosystem is fully operational"));
+  finalBanner.appendChild(el("p", "small", "Every phase delivered. All five businesses live, one connected ecosystem."));
+  container.appendChild(finalBanner);
+
+  const mainRow = el("div", "main-row");
+  container.appendChild(mainRow);
+  const wheelCol = el("div", "wheel-col");
+  wheelCol.id = "wheelCol";
+  const listCol = el("div", "list-col");
+  mainRow.appendChild(wheelCol);
+  mainRow.appendChild(listCol);
 
   // ---- Wheel ----
   const wheelSvg = document.createElementNS(svgns, "svg");
@@ -200,11 +240,16 @@ function buildWheel(container, data) {
     wheelSvg.appendChild(sub);
   });
 
-  container.appendChild(wheelSvg);
+  wheelCol.appendChild(wheelSvg);
 
   // ---- Milestone panel ----
-  const msPanel = el("div"); msPanel.id = "msPanel"; msPanel.style.marginTop = "0.5rem";
-  container.appendChild(msPanel);
+  const heading = el("div", "deliverables-heading");
+  heading.appendChild(el("span", null, "Core deliverables"));
+  heading.appendChild(el("span", null, ""));
+  heading.lastChild.id = "deliverablesCount";
+  listCol.appendChild(heading);
+  const msPanel = el("div"); msPanel.id = "msPanel";
+  listCol.appendChild(msPanel);
 
   // ---- Coming next (phase 4 only) ----
   const cn = el("div","coming-next");
@@ -214,7 +259,7 @@ function buildWheel(container, data) {
   const ul = el("ul");
   data.comingNext.forEach(item => ul.appendChild(el("li", null, esc(item))));
   cn.appendChild(ul);
-  container.appendChild(cn);
+  listCol.appendChild(cn);
 
   // ---- Behaviour ----
   function setSector(key, state, ramp) {
@@ -257,15 +302,21 @@ function buildWheel(container, data) {
       setSector(key, state, RAMPS[div.style]);
     });
     const itemsSoFar = data.phases.slice(0, phase).reduce((sum, ph) => sum + ph.items.length, 0);
-    document.getElementById("ecoPct").textContent = Math.round(itemsSoFar/totalItems*100) + "%";
+    const pct = Math.round(itemsSoFar/totalItems*100);
+    document.getElementById("ecoPct").textContent = pct + "%";
     setSector("hub", phase >= data.hub.threshold ? "complete" : "dormant", RAMPS.accent);
     document.getElementById("hub-sub").textContent = phase >= data.hub.osThreshold ? data.hub.subAfter : data.hub.subBefore;
 
     msPanel.innerHTML = p.items.map(ms =>
       '<div class="ms-item"><p class="ms-tag">' + esc(data.divLabel[ms.tag]) + '</p><p class="ms-title">' + esc(ms.title) + '</p><p class="ms-detail">' + esc(ms.detail) + '</p></div>'
     ).join("");
+    document.getElementById("deliverablesCount").textContent = p.items.length + " for this phase";
 
-    document.getElementById("comingNext").style.display = (phase === nStops) ? "block" : "none";
+    const isFinal = phase === nStops;
+    document.getElementById("comingNext").style.display = isFinal ? "block" : "none";
+    document.getElementById("finalBanner").classList.toggle("show", isFinal);
+    document.getElementById("metricCard").classList.toggle("complete", isFinal);
+    document.getElementById("wheelCol").classList.toggle("complete", isFinal);
 
     renderTimeline(phase);
   }
