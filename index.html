@@ -6,69 +6,77 @@
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="default" />
 <meta name="apple-mobile-web-app-title" content="Dream Roadmap" />
-<meta name="theme-color" content="#efe7d9" />
+<meta name="theme-color" content="#F4ECE0" />
 <link rel="manifest" href="manifest.json" />
 <link rel="apple-touch-icon" href="icon-192.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
 <title>Dream Ecosystem Roadmap</title>
 <style>
   :root {
-    --bg: #efe7d9;
-    --surface-1: #faf6ef;
-    --surface-2: #f2ebdd;
-    --border: #e3d8c5;
-    --border-strong: #cbb994;
-    --text-primary: #332e26;
-    --text-secondary: #6b6255;
-    --text-muted: #948a79;
-    --accent: #c0653c;
-    --accent-soft: #f0dcd0;
-    --accent-dark: #8f3f22;
-    --wheel-dormant-fill: #d9d4c7;
-    --wheel-dormant-stroke: #b7b09b;
+    --bg: #F4ECE0;
+    --surface-1: #FBF7F0;
+    --surface-2: #F4ECE0;
+    --border: rgba(66,45,35,.16);
+    --border-strong: rgba(66,45,35,.32);
+    --text-primary: #422D23;
+    --text-secondary: #5C4538;
+    --text-muted: rgba(66,45,35,.55);
+    --accent: #FF5B00;
+    --accent-soft: #FBDCC8;
+    --accent-dark: #E14E00;
+    --wheel-dormant-fill: #EBE1D3;
+    --wheel-dormant-stroke: rgba(66,45,35,.3);
     --radius: 10px;
-    --shadow: 0 1px 2px rgba(51,46,38,0.04), 0 4px 16px rgba(51,46,38,0.05);
+    --font-serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+    --font-sans: "Source Sans 3", Calibri, system-ui, -apple-system, sans-serif;
+    --shadow: 3px 3px 0 rgba(66,45,35,0.10);
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   body {
     margin: 0; background: var(--bg); color: var(--text-primary);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    padding: max(env(safe-area-inset-top), 18px) 16px calc(env(safe-area-inset-bottom) + 40px);
+    font-family: var(--font-sans);
+    padding: max(env(safe-area-inset-top), 18px) 20px calc(env(safe-area-inset-bottom) + 40px);
     -webkit-font-smoothing: antialiased; line-height: 1.4;
   }
   .wrap { max-width: 1160px; margin: 0 auto; }
-  h1 { font-size: 20px; margin: 2px 0 4px; font-weight: 650; letter-spacing: -0.2px; }
-  .subtitle { color: var(--text-secondary); font-size: 13.5px; margin: 0 0 16px; line-height: 1.5; }
+  .eyebrow { font-size: 12px; font-weight: 700; color: var(--accent-dark); text-transform: uppercase; letter-spacing: 1px; margin: 0 0 6px; }
+  h1 { font-family: var(--font-serif); font-size: 28px; margin: 0 0 4px; font-weight: 700; letter-spacing: -0.2px; }
+  h1 em { color: var(--accent-dark); font-style: italic; }
+  .subtitle { color: var(--text-secondary); font-size: 14px; margin: 0 0 18px; line-height: 1.5; }
 
-  .top-bar { max-width: 640px; }
+  .phase-label { font-size: 15px; font-weight: 700; margin: 0 0 8px; }
 
-  .metric { background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--radius); padding: 0.85rem 1rem; box-shadow: var(--shadow); margin: 0.75rem 0 1.1rem; transition: background .4s, color .4s; }
-  .metric p:first-child { font-size: 13px; color: var(--text-secondary); margin: 0 0 4px; transition: color .4s; }
-  .metric p:last-child { font-size: 28px; font-weight: 650; margin: 0; color: var(--accent-dark); transition: color .4s; }
-  .metric.complete { background: var(--accent); }
-  .metric.complete p:first-child { color: #fbe9df; }
-  .metric.complete p:last-child { color: #ffffff; }
-
-  .final-banner { display: none; background: var(--accent-dark); color: #fff; border-radius: 14px; padding: 18px 22px; margin: 0 0 1.25rem; text-align: center; box-shadow: var(--shadow); }
+  .final-banner { display: none; background: var(--text-primary); color: #fff; border-radius: 14px; padding: 18px 22px; margin: 1.1rem 0 1.25rem; text-align: center; box-shadow: var(--shadow); }
   .final-banner.show { display: block; }
-  .final-banner .big { font-size: 19px; font-weight: 700; margin: 0 0 4px; letter-spacing: -0.2px; }
-  .final-banner .small { font-size: 13px; margin: 0; opacity: 0.88; }
+  .final-banner .big { font-family: var(--font-serif); font-size: 21px; font-weight: 700; margin: 0 0 4px; letter-spacing: -0.2px; }
+  .final-banner .small { font-size: 13.5px; margin: 0; opacity: 0.88; }
 
-  .main-row { display: grid; grid-template-columns: minmax(300px, 460px) 1fr; gap: 28px; align-items: start; }
-  @media (max-width: 860px) { .main-row { grid-template-columns: 1fr; } .list-col { max-height: none !important; overflow: visible !important; } }
-  .list-col { max-height: 640px; overflow-y: auto; padding-right: 4px; }
-  .wheel-col svg { transition: filter .5s; }
-  .wheel-col.complete svg { filter: drop-shadow(0 0 20px rgba(192,101,60,0.5)); }
+  .main-row { display: grid; grid-template-columns: minmax(380px, 620px) 1fr; gap: 32px; align-items: start; margin-top: 1.25rem; }
+  @media (max-width: 900px) { .main-row { grid-template-columns: 1fr; } .list-col { max-height: none !important; overflow: visible !important; } }
+  .list-col { max-height: 660px; overflow-y: auto; padding-right: 4px; }
+
+  .wheel-row { display: flex; flex-direction: row; align-items: stretch; gap: 16px; }
+  .wheel-shell { flex: 1; min-width: 0; transition: filter .5s; }
+  .wheel-shell.complete { filter: drop-shadow(0 0 22px rgba(255,91,0,0.45)); }
+
+  .thermo-wrap { display: flex; flex-direction: column; align-items: center; gap: 8px; width: 34px; flex-shrink: 0; }
+  .thermo-label { font-family: var(--font-serif); font-weight: 700; font-size: 15px; color: var(--accent-dark); }
+  .thermo-track { flex: 1; width: 22px; background: var(--surface-1); border: 1px solid var(--border); border-radius: 11px; display: flex; flex-direction: column; justify-content: flex-end; overflow: hidden; box-shadow: inset 0 1px 3px rgba(66,45,35,0.08); }
+  .thermo-fill { width: 100%; background: var(--accent); border-radius: 11px; transition: height .5s; }
+  .thermo-cap { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .5px; }
 
   .deliverables-heading { display: flex; align-items: baseline; justify-content: space-between; margin: 0 0 12px; }
-  .deliverables-heading span:first-child { font-size: 13px; font-weight: 700; color: var(--accent-dark); text-transform: uppercase; letter-spacing: 0.6px; }
+  .deliverables-heading span:first-child { font-size: 13px; font-weight: 700; color: var(--accent-dark); text-transform: uppercase; letter-spacing: 0.8px; }
   .deliverables-heading span:last-child { font-size: 12px; color: var(--text-muted); }
-  .ms-item { background: var(--surface-1); border-left: 3px solid var(--accent); border-radius: 8px; padding: 12px 14px; margin-bottom: 10px; box-shadow: var(--shadow); }
+  .ms-item { background: var(--surface-1); border: 1px solid var(--border); border-left: 4px solid var(--accent); border-radius: 8px; padding: 12px 14px; margin-bottom: 10px; box-shadow: var(--shadow); }
   .ms-tag { display: inline-block; font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: var(--accent-dark); background: var(--accent-soft); padding: 2px 8px; border-radius: 20px; margin: 0 0 6px; }
   .ms-title { font-size: 15px; font-weight: 700; margin: 0 0 3px; }
   .ms-detail { font-size: 13.5px; color: var(--text-secondary); margin: 0; line-height: 1.5; }
 
-  .coming-next { margin-top: 0.5rem; border: 1px dashed var(--border-strong); border-radius: 12px; padding: 1rem 1.25rem; background: var(--surface-2); }
-  .coming-next p { font-size: 14px; font-weight: 600; margin: 0 0 8px; }
+  .coming-next { margin-top: 0.5rem; border: 1px dashed var(--border-strong); border-radius: 12px; padding: 1rem 1.25rem; background: var(--surface-1); }
+  .coming-next p { font-size: 14px; font-weight: 700; margin: 0 0 8px; }
   .coming-next ul { margin: 0; padding-left: 18px; font-size: 13px; color: var(--text-secondary); line-height: 1.7; }
   footer { text-align: center; color: var(--text-muted); font-size: 11px; margin-top: 22px; }
   footer a { color: var(--text-muted); text-decoration: underline; cursor: pointer; }
@@ -76,12 +84,12 @@
   /* Password gate */
   .gate { max-width: 340px; margin: 12vh auto 0; text-align: center; }
   .gate .lock { font-size: 34px; }
-  .gate h2 { font-size: 18px; margin: 12px 0 4px; }
+  .gate h2 { font-family: var(--font-serif); font-size: 20px; margin: 12px 0 4px; }
   .gate p { color: var(--text-secondary); font-size: 13px; margin: 0 0 18px; line-height: 1.5; }
-  .gate input[type="password"] { width: 100%; padding: 13px 14px; font-size: 15px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface-1); color: var(--text-primary); box-shadow: var(--shadow); }
+  .gate input[type="password"] { width: 100%; padding: 13px 14px; font-size: 15px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface-1); color: var(--text-primary); box-shadow: var(--shadow); font-family: var(--font-sans); }
   .gate input[type="password"]:focus { outline: none; border-color: var(--accent); }
   .gate input[type="checkbox"] { width: 15px; height: 15px; accent-color: var(--accent); }
-  .gate button { width: 100%; margin-top: 10px; padding: 13px; font-size: 15px; font-weight: 600; color: #fff; background: var(--accent); border: none; border-radius: 12px; cursor: pointer; }
+  .gate button { width: 100%; margin-top: 10px; padding: 13px; font-size: 15px; font-weight: 700; color: #fff; background: var(--accent); border: none; border-radius: 12px; cursor: pointer; font-family: var(--font-sans); }
   .gate button:active { transform: scale(0.98); }
   .gate .err { color: #a53a24; font-size: 13px; margin-top: 12px; min-height: 16px; }
   .gate label { display: flex; gap: 7px; align-items: center; justify-content: center; margin-top: 14px; font-size: 12px; color: var(--text-muted); cursor: pointer; }
@@ -106,8 +114,13 @@ const WEDGES = [
   {key:'spaces',    d:'M287.1,422.8 L187.1,560.3 A260,260 0 0,1 92.7,269.7 L254.4,322.2 A90,90 0 0,0 287.1,422.8 Z',  lx:174, ly:404}
 ];
 
+// Sub-brand jewel tones from the Dream design language: one colour per sub-brand,
+// core businesses (Media, Portfolio, the App itself) stay in the core Orange.
 const RAMPS = {
-  accent: {fill:'#f0dcd0', stroke:'#c0653c', title:'#8f3f22', sub:'#a5522f'}
+  accent:  {fill:'#FBDCC8', stroke:'#E14E00', title:'#E14E00', sub:'#c6440e'},
+  fund:     {fill:'#E3E1F2', stroke:'#302783', title:'#302783', sub:'#4c419c'},
+  banking:  {fill:'#DCEAF0', stroke:'#005270', title:'#005270', sub:'#1f6a85'},
+  community:{fill:'#DCEEE9', stroke:'#006453', title:'#006453', sub:'#1f8570'}
 };
 
 let DATA = null;
@@ -116,44 +129,32 @@ function buildWheel(container, data) {
   container.innerHTML = "";
   const nStops = data.phases.length;
 
-  const topBar = el("div", "top-bar");
-  container.appendChild(topBar);
-
-  // ---- Timeline ----
-  const phaseLabel = el("p", null, "Phase 1 (" + data.phases[0].range + ")");
-  phaseLabel.style.cssText = "font-size:14px;font-weight:600;margin:0 0 4px";
-  topBar.appendChild(phaseLabel);
+  // ---- Timeline (full width) ----
+  const phaseLabel = el("p", "phase-label", "Phase 1 (" + data.phases[0].range + ")");
+  container.appendChild(phaseLabel);
 
   const tlSvg = document.createElementNS(svgns, "svg");
-  tlSvg.setAttribute("width", "100%"); tlSvg.setAttribute("viewBox", "0 0 680 90");
+  tlSvg.setAttribute("width", "100%"); tlSvg.setAttribute("viewBox", "0 0 1120 90");
   tlSvg.style.cssText = "cursor:pointer;touch-action:none";
   const baseline = document.createElementNS(svgns, "line");
-  baseline.setAttribute("x1","60"); baseline.setAttribute("y1","40"); baseline.setAttribute("x2","620"); baseline.setAttribute("y2","40");
+  baseline.setAttribute("x1","40"); baseline.setAttribute("y1","40"); baseline.setAttribute("x2","1080"); baseline.setAttribute("y2","40");
   baseline.setAttribute("stroke","var(--border)"); baseline.setAttribute("stroke-width","2");
   tlSvg.appendChild(baseline);
   const progress = document.createElementNS(svgns, "line");
-  progress.setAttribute("id","tl-progress"); progress.setAttribute("x1","60"); progress.setAttribute("y1","40"); progress.setAttribute("x2","60"); progress.setAttribute("y2","40");
+  progress.setAttribute("id","tl-progress"); progress.setAttribute("x1","40"); progress.setAttribute("y1","40"); progress.setAttribute("x2","40"); progress.setAttribute("y2","40");
   progress.setAttribute("stroke", RAMPS.accent.stroke); progress.setAttribute("stroke-width","2");
   tlSvg.appendChild(progress);
-  const step = 560 / (nStops - 1);
+  const step = 1040 / (nStops - 1);
   data.phases.forEach((p, idx) => {
-    const x = 60 + idx * step;
+    const x = 40 + idx * step;
     const c = document.createElementNS(svgns, "circle");
     c.setAttribute("id","stop-"+p.phase); c.setAttribute("cx", x); c.setAttribute("cy", 40); c.setAttribute("r", 7);
     const t = document.createElementNS(svgns, "text");
     t.setAttribute("x", x); t.setAttribute("y", 66); t.setAttribute("text-anchor","middle");
-    t.setAttribute("style","font-size:11px;fill:var(--text-muted)"); t.textContent = p.range;
+    t.setAttribute("style","font-size:12px;font-family:var(--font-sans);fill:var(--text-muted)"); t.textContent = p.range;
     tlSvg.appendChild(c); tlSvg.appendChild(t);
   });
-  topBar.appendChild(tlSvg);
-
-  // ---- Metric ----
-  const metric = el("div","metric");
-  metric.id = "metricCard";
-  metric.appendChild(el("p",null,"Ecosystem complete"));
-  metric.appendChild(el("p",null,"0%"));
-  metric.lastChild.id = "ecoPct";
-  topBar.appendChild(metric);
+  container.appendChild(tlSvg);
 
   // ---- Final-stage emotional moment ----
   const finalBanner = el("div", "final-banner");
@@ -165,12 +166,28 @@ function buildWheel(container, data) {
   const mainRow = el("div", "main-row");
   container.appendChild(mainRow);
   const wheelCol = el("div", "wheel-col");
-  wheelCol.id = "wheelCol";
+  const wheelRow = el("div", "wheel-row");
+  wheelCol.appendChild(wheelRow);
   const listCol = el("div", "list-col");
   mainRow.appendChild(wheelCol);
   mainRow.appendChild(listCol);
 
+  // ---- Thermometer ----
+  const thermoWrap = el("div", "thermo-wrap");
+  thermoWrap.appendChild(el("div", "thermo-label", "0%"));
+  thermoWrap.lastChild.id = "ecoPct";
+  const track = el("div", "thermo-track");
+  const fill = el("div", "thermo-fill");
+  fill.id = "thermoFill";
+  track.appendChild(fill);
+  thermoWrap.appendChild(track);
+  thermoWrap.appendChild(el("div", "thermo-cap", "live"));
+  wheelRow.appendChild(thermoWrap);
+
   // ---- Wheel ----
+  const wheelShell = el("div", "wheel-shell");
+  wheelShell.id = "wheelCol";
+  wheelRow.appendChild(wheelShell);
   const wheelSvg = document.createElementNS(svgns, "svg");
   wheelSvg.setAttribute("width","100%"); wheelSvg.setAttribute("viewBox","0 0 680 630");
 
@@ -179,10 +196,10 @@ function buildWheel(container, data) {
   pattern.setAttribute("id","hatch-accent"); pattern.setAttribute("width","7"); pattern.setAttribute("height","7");
   pattern.setAttribute("patternUnits","userSpaceOnUse"); pattern.setAttribute("patternTransform","rotate(45)");
   const hatchBg = document.createElementNS(svgns, "rect");
-  hatchBg.setAttribute("width","7"); hatchBg.setAttribute("height","7"); hatchBg.setAttribute("fill","#f0dcd0");
+  hatchBg.setAttribute("width","7"); hatchBg.setAttribute("height","7"); hatchBg.setAttribute("fill","#DCEAF0");
   const hatchLine = document.createElementNS(svgns, "line");
   hatchLine.setAttribute("x1","0"); hatchLine.setAttribute("y1","0"); hatchLine.setAttribute("x2","0"); hatchLine.setAttribute("y2","7");
-  hatchLine.setAttribute("stroke","#c0653c"); hatchLine.setAttribute("stroke-width","3");
+  hatchLine.setAttribute("stroke","#005270"); hatchLine.setAttribute("stroke-width","3");
   pattern.appendChild(hatchBg); pattern.appendChild(hatchLine);
   defs.appendChild(pattern);
   wheelSvg.appendChild(defs);
@@ -212,13 +229,13 @@ function buildWheel(container, data) {
   const hubTitle = document.createElementNS(svgns,"text");
   hubTitle.setAttribute("id","hub-title"); hubTitle.setAttribute("x","340"); hubTitle.setAttribute("y","342");
   hubTitle.setAttribute("text-anchor","middle"); hubTitle.setAttribute("dominant-baseline","central");
-  hubTitle.style.cssText = "font-size:14px;font-weight:600;fill:var(--text-secondary)";
+  hubTitle.style.cssText = "font-size:15px;font-weight:700;font-family:var(--font-serif);fill:var(--text-secondary)";
   hubTitle.textContent = data.hub.label;
   wheelSvg.appendChild(hubTitle);
   const hubSub = document.createElementNS(svgns,"text");
   hubSub.setAttribute("id","hub-sub"); hubSub.setAttribute("x","340"); hubSub.setAttribute("y","364");
   hubSub.setAttribute("text-anchor","middle"); hubSub.setAttribute("dominant-baseline","central");
-  hubSub.style.cssText = "font-size:12px;fill:var(--text-secondary)";
+  hubSub.style.cssText = "font-size:12px;font-family:var(--font-sans);fill:var(--text-secondary)";
   hubSub.textContent = data.hub.subBefore;
   wheelSvg.appendChild(hubSub);
 
@@ -229,18 +246,18 @@ function buildWheel(container, data) {
     const title = document.createElementNS(svgns,"text");
     title.setAttribute("id", w.key+"-title"); title.setAttribute("x", w.lx); title.setAttribute("y", hasSub ? w.ly-11 : w.ly);
     title.setAttribute("text-anchor","middle"); title.setAttribute("dominant-baseline","central");
-    title.style.cssText = "font-size:14px;font-weight:600;fill:var(--text-secondary)";
+    title.style.cssText = "font-size:14.5px;font-weight:700;font-family:var(--font-serif);fill:var(--text-secondary)";
     title.textContent = div.label;
     wheelSvg.appendChild(title);
     const sub = document.createElementNS(svgns,"text");
     sub.setAttribute("id", w.key+"-sub"); sub.setAttribute("x", w.lx); sub.setAttribute("y", w.ly+11);
     sub.setAttribute("text-anchor","middle"); sub.setAttribute("dominant-baseline","central");
-    sub.style.cssText = "font-size:12px;fill:var(--text-secondary)";
+    sub.style.cssText = "font-size:12px;font-family:var(--font-sans);fill:var(--text-secondary)";
     sub.textContent = div.sub || "";
     wheelSvg.appendChild(sub);
   });
 
-  wheelCol.appendChild(wheelSvg);
+  wheelShell.appendChild(wheelSvg);
 
   // ---- Milestone panel ----
   const heading = el("div", "deliverables-heading");
@@ -283,9 +300,9 @@ function buildWheel(container, data) {
       const c = document.getElementById("stop-"+p.phase);
       if (p.phase < phase) { c.setAttribute("r","7"); c.setAttribute("fill", RAMPS.accent.stroke); c.setAttribute("stroke", RAMPS.accent.stroke); c.setAttribute("stroke-width","1"); }
       else if (p.phase === phase) { c.setAttribute("r","10"); c.setAttribute("fill", RAMPS.accent.fill); c.setAttribute("stroke", RAMPS.accent.stroke); c.setAttribute("stroke-width","2"); }
-      else { c.setAttribute("r","7"); c.setAttribute("fill","var(--surface-2)"); c.setAttribute("stroke","var(--border-strong)"); c.setAttribute("stroke-width","1"); }
+      else { c.setAttribute("r","7"); c.setAttribute("fill","var(--surface-1)"); c.setAttribute("stroke","var(--border-strong)"); c.setAttribute("stroke-width","1"); }
     });
-    document.getElementById("tl-progress").setAttribute("x2", 60 + (phase-1) * step);
+    document.getElementById("tl-progress").setAttribute("x2", 40 + (phase-1) * step);
   }
 
   const totalItems = data.phases.reduce((sum, p) => sum + p.items.length, 0);
@@ -304,6 +321,7 @@ function buildWheel(container, data) {
     const itemsSoFar = data.phases.slice(0, phase).reduce((sum, ph) => sum + ph.items.length, 0);
     const pct = Math.round(itemsSoFar/totalItems*100);
     document.getElementById("ecoPct").textContent = pct + "%";
+    document.getElementById("thermoFill").style.height = pct + "%";
     setSector("hub", phase >= data.hub.threshold ? "complete" : "dormant", RAMPS.accent);
     document.getElementById("hub-sub").textContent = phase >= data.hub.osThreshold ? data.hub.subAfter : data.hub.subBefore;
 
@@ -315,7 +333,6 @@ function buildWheel(container, data) {
     const isFinal = phase === nStops;
     document.getElementById("comingNext").style.display = isFinal ? "block" : "none";
     document.getElementById("finalBanner").classList.toggle("show", isFinal);
-    document.getElementById("metricCard").classList.toggle("complete", isFinal);
     document.getElementById("wheelCol").classList.toggle("complete", isFinal);
 
     renderTimeline(phase);
@@ -324,9 +341,9 @@ function buildWheel(container, data) {
   let dragging = false;
   function xToPhase(clientX) {
     const rect = tlSvg.getBoundingClientRect();
-    const scale = 680 / rect.width;
+    const scale = 1120 / rect.width;
     const x = (clientX - rect.left) * scale;
-    return 1 + (x - 60) / step;
+    return 1 + (x - 40) / step;
   }
   tlSvg.addEventListener("pointerdown", e => { dragging = true; tlSvg.setPointerCapture(e.pointerId); setPhase(xToPhase(e.clientX)); });
   tlSvg.addEventListener("pointermove", e => { if (dragging) setPhase(xToPhase(e.clientX)); });
@@ -340,7 +357,8 @@ function render(data) {
   DATA = data;
   const app = document.getElementById("app");
   app.innerHTML = "";
-  app.appendChild(el("h1", null, "Dream ecosystem roadmap"));
+  app.appendChild(el("p", "eyebrow", "Dream &middot; internal roadmap"));
+  app.appendChild(el("h1", null, "Dream ecosystem <em>roadmap</em>"));
   app.appendChild(el("p", "subtitle", "Drag the timeline to see the ecosystem wheel fill in as each phase lands."));
   const wheelHost = el("div");
   app.appendChild(wheelHost);
