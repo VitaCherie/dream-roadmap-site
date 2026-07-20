@@ -150,10 +150,11 @@
   .stage svg.stage-wheel { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; transition: opacity 1.1s ease; }
   .stage.restructured svg.stage-wheel { opacity: 1; }
   .chip-pos { position: absolute; transform: translate(-50%, -50%); transition: left 1.3s var(--ease), top 1.3s var(--ease); }
-  .chip { position: relative; background: var(--surface-1); border: 1.5px solid var(--border-strong); border-radius: 10px; padding: 9px 14px; display: flex; align-items: center; box-shadow: var(--shadow); white-space: nowrap; animation: chipFloat 4s ease-in-out infinite; transition: background .6s, border-color .6s, border-radius .4s; }
-  .stage.restructured .chip { animation: none; border-radius: 8px; }
+  .chip { position: relative; display: flex; align-items: center; white-space: nowrap; animation: chipFloat 4s ease-in-out infinite; filter: drop-shadow(2px 3px 3px rgba(66,45,35,0.15)); }
+  .stage.restructured .chip { animation: none; }
   @keyframes chipFloat { 0%, 100% { transform: translateY(0) rotate(var(--rot, 0deg)); } 50% { transform: translateY(-8px) rotate(var(--rot, 0deg)); } }
-  .chip-logo { height: 22px; width: auto; display: block; }
+  .chip-logo { height: 42px; width: auto; display: block; }
+  .chip-logo--hub { height: 64px; }
   .chip-wordmark { font-family: var(--font-serif); font-style: italic; font-weight: 700; font-size: 13.5px; color: var(--text-primary); }
   .chip-tag { position: absolute; top: 100%; left: 50%; transform: translateX(-50%); margin-top: 5px; font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; color: var(--accent-dark); background: var(--accent-soft); padding: 2px 8px; border-radius: 20px; white-space: nowrap; opacity: 0; transition: opacity .4s ease; }
   .stage.restructured .chip-tag { opacity: 1; transition: opacity .5s ease 1.05s; }
@@ -171,8 +172,8 @@
   .vision-card ul { margin: 0; padding-left: 18px; font-size: 13.5px; color: var(--text-secondary); line-height: 1.85; }
   .vision-card ul li::marker { color: var(--accent); }
   @media (max-width: 480px) {
-    .chip { font-size: 10.5px; padding: 5px 9px; border-radius: 7px; }
-    .chip-logo { height: 16px; }
+    .chip-logo { height: 28px; }
+    .chip-logo--hub { height: 42px; }
     .chip-wordmark { font-size: 11px; }
     .chip-tag { font-size: 8px; padding: 1px 6px; }
     .new-badge { font-size: 7.5px; padding: 1px 4px; top: -7px; right: -8px; }
@@ -186,7 +187,6 @@
   .org-shared-wrap { border: 1px dashed var(--border-strong); border-radius: 14px; padding: 16px; background: rgba(66,45,35,.04); width: 100%; }
   .org-shared-row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
   .org-shared-row .org-node { background: rgba(66,45,35,.65); font-size: 11.5px; padding: 8px 14px; }
-  .org-shared-note { font-size: 11px; font-style: italic; color: var(--text-muted); text-align: center; margin: 10px 0 0; line-height: 1.5; }
   .org-businesses { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; width: 100%; margin-top: 0; }
   .org-biz-col { display: flex; flex-direction: column; align-items: center; flex: 1; min-width: 120px; }
   .org-biz { background: var(--accent-soft); color: var(--accent-dark); border: 1.5px solid var(--accent); font-size: 12.5px; }
@@ -298,16 +298,16 @@ const RAMPS = {
 // Fixed render sizes for each sub-brand logo, chosen so every wordmark sits
 // at a comparable visual height inside its wheel wedge (~48-58px tall).
 const LOGO_DIMS = {
-  hub: {w:118, h:48.8}, media: {w:108, h:53.7}, funding: {w:94, h:53.6},
-  tools: {w:122, h:51.4}, portfolio: {w:78, h:52.6}
+  hub: {w:170, h:70.4}, media: {w:108, h:53.7}, funding: {w:94, h:53.6},
+  tools: {w:122, h:51.4}, portfolio: {w:78, h:52.6}, spaces: {w:100, h:46.1}
 };
 
 let DATA = null;
 
-function makeChipContent(label, logoFile) {
+function makeChipContent(label, logoFile, big) {
   if (logoFile) {
     const img = el("img");
-    img.src = "logos/" + logoFile; img.alt = label; img.className = "chip-logo";
+    img.src = "logos/" + logoFile; img.alt = label; img.className = "chip-logo" + (big ? " chip-logo--hub" : "");
     return img;
   }
   return el("span", "chip-wordmark", esc(label));
@@ -411,14 +411,21 @@ function buildWheel(container, data) {
   wheelSvg.appendChild(hubOv);
 
   const hd = LOGO_DIMS.hub;
+  const hubImgCenterY = 322;
   const hubImg = document.createElementNS(svgns,"image");
   hubImg.setAttribute("href","logos/"+data.hub.logo); hubImg.setAttributeNS("http://www.w3.org/1999/xlink","href","logos/"+data.hub.logo);
-  hubImg.setAttribute("x", 340-hd.w/2); hubImg.setAttribute("y", 350-14-hd.h/2);
+  hubImg.setAttribute("x", 340-hd.w/2); hubImg.setAttribute("y", hubImgCenterY-hd.h/2);
   hubImg.setAttribute("width", hd.w); hubImg.setAttribute("height", hd.h);
   hubImg.setAttribute("id","hub-title");
   wheelSvg.appendChild(hubImg);
+  const hubAppTag = document.createElementNS(svgns,"text");
+  hubAppTag.setAttribute("x","340"); hubAppTag.setAttribute("y", hubImgCenterY + hd.h/2 + 14);
+  hubAppTag.setAttribute("text-anchor","middle"); hubAppTag.setAttribute("dominant-baseline","central");
+  hubAppTag.style.cssText = "font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;font-family:var(--font-sans);fill:var(--accent-dark)";
+  hubAppTag.textContent = "App";
+  wheelSvg.appendChild(hubAppTag);
   const hubSub = document.createElementNS(svgns,"text");
-  hubSub.setAttribute("id","hub-sub"); hubSub.setAttribute("x","340"); hubSub.setAttribute("y","364");
+  hubSub.setAttribute("id","hub-sub"); hubSub.setAttribute("x","340"); hubSub.setAttribute("y", hubImgCenterY + hd.h/2 + 30);
   hubSub.setAttribute("text-anchor","middle"); hubSub.setAttribute("dominant-baseline","central");
   hubSub.style.cssText = "font-size:12px;font-family:var(--font-sans);fill:var(--text-secondary)";
   hubSub.textContent = data.hub.subBefore;
@@ -616,10 +623,11 @@ function buildRestructure(container, data) {
     pos.style.top = (item.y / 630 * 100) + "%";
     const chip = el("div", "chip");
     chip.style.setProperty("--rot", item.rot + "deg");
-    const content = makeChipContent(item.label, item.logo);
+    const content = makeChipContent(item.label, item.logo, item.key === "hub");
     chip.appendChild(content);
     pos.appendChild(chip);
     if (item.key === "portfolio") pos.appendChild(el("div", "chip-tag", "Portfolio"));
+    if (item.key === "hub") pos.appendChild(el("div", "chip-tag", "App"));
     stage.appendChild(pos);
     chipEls[item.key] = { pos, chip, content };
   });
@@ -733,7 +741,6 @@ function buildOrgChart(container, data, sizeClass) {
   const sharedRow = el("div", "org-shared-row");
   o.shared.forEach(s => sharedRow.appendChild(el("div", "org-node", esc(s))));
   sharedWrap.appendChild(sharedRow);
-  sharedWrap.appendChild(el("div", "org-shared-note", esc(o.sharedNote)));
   chart.appendChild(sharedWrap);
   chart.appendChild(el("div", "org-line"));
 
