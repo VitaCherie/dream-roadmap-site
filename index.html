@@ -5,52 +5,91 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-<meta name="apple-mobile-web-app-title" content="Dream Roadmap" />
-<meta name="theme-color" content="#F4ECE0" />
+<meta name="apple-mobile-web-app-title" content="Dream" />
+<meta name="theme-color" content="#FFFFFF" />
 <link rel="manifest" href="manifest.json" />
 <link rel="apple-touch-icon" href="icon-192.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
-<title>Dream Ecosystem Roadmap</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;1,9..144,600;1,9..144,700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<title>Dream: Restructure &amp; Roadmap</title>
 <style>
+  /*
+    Brand tokens from Dream Brand Guidelines, July 2026:
+    Primary: Vivid Orange #ff5b00, Burnt Coffee #422d23, Grey #f4f4f4, White.
+    Secondary (used sparingly, precedence order): Electric Mint #0dc499, Sky Blue #1773e0,
+    Pomegranate #c80045, Fuel Yellow #f9c770, Dark Teal #176161, Iceberg Blue #8bb9c6.
+    Core fonts are Richmond Display / Source Sans Variable; Richmond Display isn't available
+    as a web font here, so Fraunces (a display serif of similar character) stands in for it.
+    Type is always left-aligned per the guidelines, never centered or justified.
+  */
   :root {
-    --bg: #F4ECE0;
-    --surface-1: #FBF7F0;
-    --surface-2: #F4ECE0;
-    --border: rgba(66,45,35,.16);
-    --border-strong: rgba(66,45,35,.32);
+    --bg: #FFFFFF;
+    --surface-1: #FFFFFF;
+    --surface-2: #F4F4F4;
+    --border: rgba(66,45,35,.14);
+    --border-strong: rgba(66,45,35,.30);
     --text-primary: #422D23;
-    --text-secondary: #5C4538;
-    --text-muted: rgba(66,45,35,.55);
+    --text-secondary: rgba(66,45,35,.72);
+    --text-muted: rgba(66,45,35,.52);
     --accent: #FF5B00;
-    --accent-soft: #FBDCC8;
+    --accent-soft: #FFE3CC;
     --accent-dark: #E14E00;
-    --wheel-dormant-fill: #EBE1D3;
-    --wheel-dormant-stroke: rgba(66,45,35,.3);
-    --radius: 10px;
-    --font-serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+    --wheel-dormant-fill: #EFEFEF;
+    --wheel-dormant-stroke: rgba(66,45,35,.26);
+    --font-serif: "Fraunces", Georgia, "Times New Roman", serif;
     --font-sans: "Source Sans 3", Calibri, system-ui, -apple-system, sans-serif;
-    --shadow: 3px 3px 0 rgba(66,45,35,0.10);
+    --shadow: 3px 3px 0 rgba(66,45,35,0.08);
+    --ease: cubic-bezier(.22,1,.36,1);
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; }
   body {
     margin: 0; background: var(--bg); color: var(--text-primary);
     font-family: var(--font-sans);
-    padding: max(env(safe-area-inset-top), 18px) 20px calc(env(safe-area-inset-bottom) + 40px);
     -webkit-font-smoothing: antialiased; line-height: 1.4;
+    cursor: default;
   }
-  .wrap { max-width: 1160px; margin: 0 auto; }
-  .eyebrow { font-size: 12px; font-weight: 700; color: var(--accent-dark); text-transform: uppercase; letter-spacing: 1px; margin: 0 0 6px; }
-  .brand-row { display: flex; align-items: center; gap: 12px; margin: 0 0 4px; }
-  .brand-row img { height: 34px; width: auto; display: block; }
-  h1 { font-family: var(--font-serif); font-size: 28px; margin: 0; font-weight: 700; letter-spacing: -0.2px; }
+  .wrap { max-width: 1160px; margin: 0 auto; padding: 0 20px; }
+  .eyebrow { font-size: 12px; font-weight: 700; color: var(--accent-dark); text-transform: uppercase; letter-spacing: 1px; margin: 0 0 6px; text-align: left; }
+  h1 { font-family: var(--font-serif); font-size: 32px; margin: 0; font-weight: 700; letter-spacing: -0.2px; text-align: left; }
   h1 em { color: var(--accent-dark); font-style: italic; }
-  .subtitle { color: var(--text-secondary); font-size: 14px; margin: 0 0 18px; line-height: 1.5; }
+  .subtitle { color: var(--text-secondary); font-size: 14px; margin: 10px 0 0; line-height: 1.55; text-align: left; max-width: 46em; }
 
-  .phase-label { font-size: 15px; font-weight: 700; margin: 0 0 8px; }
+  /* Grain overlay for texture */
+  #grain { position: fixed; inset: 0; pointer-events: none; z-index: 60; opacity: .035; mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>"); }
 
-  .final-banner { display: none; background: var(--text-primary); color: #fff; border-radius: 14px; padding: 18px 22px; margin: 1.1rem 0 1.25rem; text-align: center; box-shadow: var(--shadow); }
+  /* Scroll progress */
+  #scrollProgress { position: fixed; top: 0; left: 0; height: 3px; width: 0%; background: var(--accent); z-index: 70; transition: width .1s linear; }
+
+  /* Custom cursor */
+  #cursorDot { position: fixed; top: 0; left: 0; width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid var(--accent); pointer-events: none; z-index: 65; transform: translate(-50%,-50%); transition: width .25s var(--ease), height .25s var(--ease), background .25s var(--ease), opacity .3s; opacity: 0; }
+  #cursorDot.active { opacity: 1; }
+  #cursorDot.hover { width: 34px; height: 34px; background: rgba(255,91,0,.12); }
+  @media (pointer: coarse) { #cursorDot { display: none; } }
+
+  /* Header */
+  header.site-header { position: sticky; top: 0; z-index: 50; background: rgba(255,255,255,.86); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); padding: max(env(safe-area-inset-top), 14px) 0 14px; }
+  header .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  .logo-mark { height: 30px; width: auto; display: block; }
+  .site-nav { display: flex; gap: 6px; }
+  .site-nav a { font-family: var(--font-sans); font-weight: 700; font-size: 12.5px; padding: 8px 16px; border-radius: 20px; border: 1px solid var(--border); background: var(--surface-1); color: var(--text-secondary); cursor: pointer; text-decoration: none; transition: background .3s, color .3s, border-color .3s, transform .3s var(--ease); display: inline-block; }
+  .site-nav a.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+  main { display: block; }
+  section.section { padding: 56px 0 64px; scroll-margin-top: 78px; }
+  section.section.alt { background: var(--surface-2); }
+  section.section + section.section { border-top: 1px solid var(--border); }
+
+  /* Scroll reveal */
+  .reveal { opacity: 0; transform: translateY(20px); transition: opacity .7s var(--ease), transform .7s var(--ease); }
+  .reveal.is-visible { opacity: 1; transform: translateY(0); }
+  @media (prefers-reduced-motion: reduce) { .reveal { opacity: 1 !important; transform: none !important; transition: none !important; } }
+
+  .phase-label { font-size: 15px; font-weight: 700; margin: 28px 0 8px; }
+
+  .final-banner { display: none; background: var(--text-primary); color: #fff; border-radius: 14px; padding: 18px 22px; margin: 1.1rem 0 1.25rem; box-shadow: var(--shadow); }
   .final-banner.show { display: block; }
   .final-banner .big { font-family: var(--font-serif); font-size: 21px; font-weight: 700; margin: 0 0 4px; letter-spacing: -0.2px; }
   .final-banner .small { font-size: 13.5px; margin: 0; opacity: 0.88; }
@@ -61,11 +100,11 @@
 
   .wheel-row { display: flex; flex-direction: row; align-items: stretch; gap: 16px; }
   .wheel-shell { flex: 1; min-width: 0; transition: filter .5s; }
-  .wheel-shell.complete { filter: drop-shadow(0 0 22px rgba(255,91,0,0.45)); }
+  .wheel-shell.complete { filter: drop-shadow(0 0 22px rgba(255,91,0,0.35)); }
 
   .thermo-wrap { display: flex; flex-direction: column; align-items: center; gap: 8px; width: 34px; flex-shrink: 0; }
   .thermo-label { font-family: var(--font-serif); font-weight: 700; font-size: 15px; color: var(--accent-dark); }
-  .thermo-track { flex: 1; width: 22px; background: var(--surface-1); border: 1px solid var(--border); border-radius: 11px; display: flex; flex-direction: column; justify-content: flex-end; overflow: hidden; box-shadow: inset 0 1px 3px rgba(66,45,35,0.08); }
+  .thermo-track { flex: 1; width: 22px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 11px; display: flex; flex-direction: column; justify-content: flex-end; overflow: hidden; box-shadow: inset 0 1px 3px rgba(66,45,35,0.08); }
   .thermo-fill { width: 100%; background: var(--accent); border-radius: 11px; transition: height .5s; }
   .thermo-cap { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .5px; }
 
@@ -80,33 +119,28 @@
   .coming-next { margin-top: 0.5rem; border: 1px dashed var(--border-strong); border-radius: 12px; padding: 1rem 1.25rem; background: var(--surface-1); }
   .coming-next p { font-size: 14px; font-weight: 700; margin: 0 0 8px; }
   .coming-next ul { margin: 0; padding-left: 18px; font-size: 13px; color: var(--text-secondary); line-height: 1.7; }
-  footer { text-align: center; color: var(--text-muted); font-size: 11px; margin-top: 22px; }
+  footer { text-align: left; color: var(--text-muted); font-size: 11px; padding: 24px 20px max(env(safe-area-inset-bottom), 24px); }
   footer a { color: var(--text-muted); text-decoration: underline; cursor: pointer; }
 
-  /* Tabs */
-  .tab-nav { display: flex; gap: 8px; margin: 6px 0 20px; }
-  .tab-btn { font-family: var(--font-sans); font-weight: 700; font-size: 13px; padding: 9px 18px; border-radius: 20px; border: 1px solid var(--border); background: var(--surface-1); color: var(--text-secondary); cursor: pointer; }
-  .tab-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
-  .view { display: none; }
-  .view.active { display: block; }
-
-  /* Restructure view */
+  /* Restructure section */
   .restructure-row { display: grid; grid-template-columns: minmax(380px, 620px) 1fr; gap: 32px; align-items: start; margin-top: 1.1rem; }
   @media (max-width: 900px) { .restructure-row { grid-template-columns: 1fr; } }
   .stage { position: relative; width: 100%; aspect-ratio: 680 / 630; }
   .stage svg.stage-wheel { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; transition: opacity 1.1s ease; }
   .stage.restructured svg.stage-wheel { opacity: 1; }
-  .chip-pos { position: absolute; transform: translate(-50%, -50%); transition: left 1.3s cubic-bezier(.22,1,.36,1), top 1.3s cubic-bezier(.22,1,.36,1); }
-  .chip { background: var(--surface-1); border: 1.5px solid var(--border-strong); border-radius: 10px; padding: 9px 15px; font-family: var(--font-serif); font-weight: 700; font-size: 13.5px; color: var(--text-primary); box-shadow: var(--shadow); white-space: nowrap; display: inline-block; animation: chipFloat 4s ease-in-out infinite; transition: background .6s, border-color .6s, color .6s, border-radius .4s; }
+  .chip-pos { position: absolute; transform: translate(-50%, -50%); transition: left 1.3s var(--ease), top 1.3s var(--ease); }
+  .chip { position: relative; background: var(--surface-1); border: 1.5px solid var(--border-strong); border-radius: 10px; padding: 9px 15px; font-family: var(--font-serif); font-weight: 700; font-size: 13.5px; color: var(--text-primary); box-shadow: var(--shadow); white-space: nowrap; display: inline-block; animation: chipFloat 4s ease-in-out infinite; transition: background .6s, border-color .6s, color .6s, border-radius .4s; }
   .stage.restructured .chip { animation: none; border-radius: 8px; }
   @keyframes chipFloat { 0%, 100% { transform: translateY(0) rotate(var(--rot, 0deg)); } 50% { transform: translateY(-8px) rotate(var(--rot, 0deg)); } }
+  .chip-tag { position: absolute; top: 100%; left: 50%; transform: translateX(-50%); margin-top: 5px; font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; color: var(--accent-dark); background: var(--accent-soft); padding: 2px 8px; border-radius: 20px; white-space: nowrap; opacity: 0; transition: opacity .4s ease; }
+  .stage.restructured .chip-tag { opacity: 1; transition: opacity .5s ease 1.05s; }
   .new-chip-pos { position: absolute; transform: translate(-50%, -50%) scale(0); transition: transform .55s cubic-bezier(.34,1.56,.64,1); }
   .new-chip-pos.show { transform: translate(-50%, -50%) scale(1); }
-  .new-chip-pos .chip { position: relative; animation: none; }
+  .new-chip-pos .chip { animation: none; }
   .new-badge { position: absolute; top: -9px; right: -11px; background: var(--accent); color: #fff; font-size: 9px; font-weight: 800; letter-spacing: .3px; padding: 2px 6px; border-radius: 20px; box-shadow: var(--shadow); font-family: var(--font-sans); }
   .chip-glow { animation: glowPulse 1.3s ease-out 2; }
   @keyframes glowPulse { 0% { box-shadow: 0 0 0 0 rgba(255,91,0,.5); } 100% { box-shadow: 0 0 0 20px rgba(255,91,0,0); } }
-  .restructure-btn { margin-top: 20px; padding: 12px 22px; font-size: 14px; font-weight: 700; font-family: var(--font-sans); color: #fff; background: var(--accent); border: none; border-radius: 10px; cursor: pointer; box-shadow: var(--shadow); }
+  .restructure-btn { margin-top: 20px; padding: 12px 22px; font-size: 14px; font-weight: 700; font-family: var(--font-sans); color: #fff; background: var(--accent); border: none; border-radius: 10px; cursor: pointer; box-shadow: var(--shadow); transition: transform .3s var(--ease), background .3s; }
   .restructure-btn.is-reset { background: var(--text-primary); }
   .stage-caption { margin-top: 14px; font-size: 13.5px; color: var(--text-secondary); min-height: 20px; }
   .vision-card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; box-shadow: var(--shadow); }
@@ -115,33 +149,45 @@
   .vision-card ul li::marker { color: var(--accent); }
   @media (max-width: 480px) {
     .chip { font-size: 10.5px; padding: 5px 9px; border-radius: 7px; }
+    .chip-tag { font-size: 8px; padding: 1px 6px; }
     .new-badge { font-size: 7.5px; padding: 1px 4px; top: -7px; right: -8px; }
   }
 
   /* Password gate */
-  .gate { max-width: 340px; margin: 12vh auto 0; text-align: center; }
+  .gate-wrap { padding: max(env(safe-area-inset-top), 18px) 20px 40px; }
+  .gate { max-width: 340px; margin: 12vh auto 0; text-align: left; }
   .gate .lock { font-size: 34px; }
   .gate h2 { font-family: var(--font-serif); font-size: 20px; margin: 12px 0 4px; }
   .gate p { color: var(--text-secondary); font-size: 13px; margin: 0 0 18px; line-height: 1.5; }
   .gate input[type="password"] { width: 100%; padding: 13px 14px; font-size: 15px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface-1); color: var(--text-primary); box-shadow: var(--shadow); font-family: var(--font-sans); }
   .gate input[type="password"]:focus { outline: none; border-color: var(--accent); }
   .gate input[type="checkbox"] { width: 15px; height: 15px; accent-color: var(--accent); }
-  .gate button { width: 100%; margin-top: 10px; padding: 13px; font-size: 15px; font-weight: 700; color: #fff; background: var(--accent); border: none; border-radius: 12px; cursor: pointer; font-family: var(--font-sans); }
+  .gate button { width: 100%; margin-top: 10px; padding: 13px; font-size: 15px; font-weight: 700; color: #fff; background: var(--accent); border: none; border-radius: 12px; cursor: pointer; font-family: var(--font-sans); transition: transform .3s var(--ease); }
   .gate button:active { transform: scale(0.98); }
   .gate .err { color: #a53a24; font-size: 13px; margin-top: 12px; min-height: 16px; }
-  .gate label { display: flex; gap: 7px; align-items: center; justify-content: center; margin-top: 14px; font-size: 12px; color: var(--text-muted); cursor: pointer; }
+  .gate label { display: flex; gap: 7px; align-items: center; margin-top: 14px; font-size: 12px; color: var(--text-muted); cursor: pointer; }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <div id="app"><p style="color:var(--text-muted)">Loading roadmap...</p></div>
-  <footer id="foot"></footer>
-</div>
+<div id="grain"></div>
+<div id="cursorDot"></div>
+<div id="scrollProgress"></div>
+<header class="site-header">
+  <div class="wrap">
+    <img src="dream-logo.png" alt="Dream" class="logo-mark" />
+    <nav class="site-nav" id="siteNav" hidden></nav>
+  </div>
+</header>
+<main id="app">
+  <div class="gate-wrap"><p style="color:var(--text-muted)">Loading&hellip;</p></div>
+</main>
+<footer id="foot"></footer>
 
 <script>
 const el = (t, c, h) => { const e = document.createElement(t); if (c) e.className = c; if (h != null) e.innerHTML = h; return e; };
 const esc = s => (s || "").replace(/[&<>"]/g, m => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[m]));
 const svgns = "http://www.w3.org/2000/svg";
+const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 const WEDGES = [
   {key:'portfolio', d:'M254.4,322.2 L92.7,269.7 A260,260 0 0,1 340,90 L340,260 A90,90 0 0,0 254.4,322.2 Z', lx:237, ly:208},
@@ -151,13 +197,14 @@ const WEDGES = [
   {key:'spaces',    d:'M287.1,422.8 L187.1,560.3 A260,260 0 0,1 92.7,269.7 L254.4,322.2 A90,90 0 0,0 287.1,422.8 Z',  lx:174, ly:404}
 ];
 
-// Sub-brand jewel tones from the Dream design language: one colour per sub-brand,
-// core businesses (Media, Portfolio, the App itself) stay in the core Orange.
+// Ramps drawn from Dream's official secondary palette (Brand Guidelines, July 2026):
+// Electric Mint, Sky Blue and Pomegranate, used sparingly per the guide's precedence order.
+// Media, Portfolio and the hub itself stay in the core Vivid Orange.
 const RAMPS = {
-  accent:  {fill:'#FBDCC8', stroke:'#E14E00', title:'#E14E00', sub:'#c6440e'},
-  fund:     {fill:'#E3E1F2', stroke:'#302783', title:'#302783', sub:'#4c419c'},
-  banking:  {fill:'#DCEAF0', stroke:'#005270', title:'#005270', sub:'#1f6a85'},
-  community:{fill:'#DCEEE9', stroke:'#006453', title:'#006453', sub:'#1f8570'}
+  accent:    {fill:'#FFE3CC', stroke:'#FF5B00', title:'#E14E00', sub:'#C2470B'},
+  banking:   {fill:'#E3EEFC', stroke:'#1773E0', title:'#125FB8', sub:'#1773E0'},
+  community: {fill:'#DCF5EF', stroke:'#0DC499', title:'#0B8F6F', sub:'#0DC499'},
+  fund:      {fill:'#F7E1E9', stroke:'#C80045', title:'#A30039', sub:'#C80045'}
 };
 
 let DATA = null;
@@ -166,7 +213,6 @@ function buildWheel(container, data) {
   container.innerHTML = "";
   const nStops = data.phases.length;
 
-  // ---- Timeline (full width) ----
   const phaseLabel = el("p", "phase-label", "Phase 1 (" + data.phases[0].range + ")");
   container.appendChild(phaseLabel);
 
@@ -193,7 +239,6 @@ function buildWheel(container, data) {
   });
   container.appendChild(tlSvg);
 
-  // ---- Final-stage emotional moment ----
   const finalBanner = el("div", "final-banner");
   finalBanner.id = "finalBanner";
   finalBanner.appendChild(el("p", "big", "The Dream ecosystem is fully operational"));
@@ -209,7 +254,6 @@ function buildWheel(container, data) {
   mainRow.appendChild(wheelCol);
   mainRow.appendChild(listCol);
 
-  // ---- Thermometer ----
   const thermoWrap = el("div", "thermo-wrap");
   thermoWrap.appendChild(el("div", "thermo-label", "0%"));
   thermoWrap.lastChild.id = "ecoPct";
@@ -221,7 +265,6 @@ function buildWheel(container, data) {
   thermoWrap.appendChild(el("div", "thermo-cap", "live"));
   wheelRow.appendChild(thermoWrap);
 
-  // ---- Wheel ----
   const wheelShell = el("div", "wheel-shell");
   wheelShell.id = "wheelCol";
   wheelRow.appendChild(wheelShell);
@@ -233,10 +276,10 @@ function buildWheel(container, data) {
   pattern.setAttribute("id","hatch-accent"); pattern.setAttribute("width","7"); pattern.setAttribute("height","7");
   pattern.setAttribute("patternUnits","userSpaceOnUse"); pattern.setAttribute("patternTransform","rotate(45)");
   const hatchBg = document.createElementNS(svgns, "rect");
-  hatchBg.setAttribute("width","7"); hatchBg.setAttribute("height","7"); hatchBg.setAttribute("fill","#DCEAF0");
+  hatchBg.setAttribute("width","7"); hatchBg.setAttribute("height","7"); hatchBg.setAttribute("fill","#E3EEFC");
   const hatchLine = document.createElementNS(svgns, "line");
   hatchLine.setAttribute("x1","0"); hatchLine.setAttribute("y1","0"); hatchLine.setAttribute("x2","0"); hatchLine.setAttribute("y2","7");
-  hatchLine.setAttribute("stroke","#005270"); hatchLine.setAttribute("stroke-width","3");
+  hatchLine.setAttribute("stroke","#1773E0"); hatchLine.setAttribute("stroke-width","3");
   pattern.appendChild(hatchBg); pattern.appendChild(hatchLine);
   defs.appendChild(pattern);
   wheelSvg.appendChild(defs);
@@ -253,7 +296,6 @@ function buildWheel(container, data) {
     wheelSvg.appendChild(ov);
   });
 
-  // Hub
   const hubBase = document.createElementNS(svgns,"circle");
   hubBase.setAttribute("cx","340"); hubBase.setAttribute("cy","350"); hubBase.setAttribute("r","90");
   hubBase.setAttribute("fill","var(--wheel-dormant-fill)"); hubBase.setAttribute("stroke","var(--wheel-dormant-stroke)"); hubBase.setAttribute("stroke-width","0.5");
@@ -276,7 +318,6 @@ function buildWheel(container, data) {
   hubSub.textContent = data.hub.subBefore;
   wheelSvg.appendChild(hubSub);
 
-  // Division labels
   WEDGES.forEach(w => {
     const div = data.divisions[w.key];
     const hasSub = !!div.sub;
@@ -296,7 +337,6 @@ function buildWheel(container, data) {
 
   wheelShell.appendChild(wheelSvg);
 
-  // ---- Milestone panel ----
   const heading = el("div", "deliverables-heading");
   heading.appendChild(el("span", null, "Core deliverables"));
   heading.appendChild(el("span", null, ""));
@@ -305,7 +345,6 @@ function buildWheel(container, data) {
   const msPanel = el("div"); msPanel.id = "msPanel";
   listCol.appendChild(msPanel);
 
-  // ---- Coming next (phase 4 only) ----
   const cn = el("div","coming-next");
   cn.id = "comingNext";
   cn.style.display = "none";
@@ -315,7 +354,6 @@ function buildWheel(container, data) {
   cn.appendChild(ul);
   listCol.appendChild(cn);
 
-  // ---- Behaviour ----
   function setSector(key, state, ramp) {
     const ov = document.getElementById("ov-"+key);
     const title = document.getElementById(key+"-title");
@@ -394,11 +432,11 @@ function buildRestructure(container, data) {
   container.innerHTML = "";
   const r = data.restructure;
 
-  container.appendChild(el("p", "eyebrow", r.eyebrow));
-  container.appendChild(el("h1", null, r.headline));
-  container.appendChild(el("p", "subtitle", r.subtitle));
+  container.appendChild(el("p", "eyebrow reveal", r.eyebrow));
+  container.appendChild(el("h1", "reveal", r.headline));
+  container.appendChild(el("p", "subtitle reveal", r.subtitle));
 
-  const row = el("div", "restructure-row");
+  const row = el("div", "restructure-row reveal");
   container.appendChild(row);
   const stageCol = el("div");
   const visionCol = el("div");
@@ -408,7 +446,6 @@ function buildRestructure(container, data) {
   const stage = el("div", "stage");
   stageCol.appendChild(stage);
 
-  // Ghost wheel, fades in on restructure
   const svg = document.createElementNS(svgns, "svg");
   svg.setAttribute("class", "stage-wheel"); svg.setAttribute("viewBox", "0 0 680 630");
   WEDGES.forEach(w => {
@@ -424,7 +461,6 @@ function buildRestructure(container, data) {
   svg.appendChild(hubShape);
   stage.appendChild(svg);
 
-  // Scattered starting chips
   const chipEls = {};
   r.scattered.forEach(item => {
     const pos = el("div", "chip-pos");
@@ -433,15 +469,16 @@ function buildRestructure(container, data) {
     const chip = el("div", "chip", esc(item.label));
     chip.style.setProperty("--rot", item.rot + "deg");
     pos.appendChild(chip);
+    if (item.key === "portfolio") {
+      pos.appendChild(el("div", "chip-tag", "Portfolio"));
+    }
     stage.appendChild(pos);
     chipEls[item.key] = { pos, chip };
   });
 
-  // Target positions match the roadmap wheel's wedge/hub geometry
   const targets = { hub: { x: 340, y: 350 } };
   WEDGES.forEach(w => { targets[w.key] = { x: w.lx, y: w.ly }; });
 
-  // New-venture chips, hidden until restructure
   const newChipEls = {};
   r.newKeys.forEach(key => {
     const t = targets[key];
@@ -457,7 +494,7 @@ function buildRestructure(container, data) {
 
   const caption = el("div", "stage-caption", esc(r.beforeCaption));
   stageCol.appendChild(caption);
-  const btn = el("button", "restructure-btn", "Restructure");
+  const btn = el("button", "restructure-btn magnetic", "Restructure");
   stageCol.appendChild(btn);
 
   const vc = el("div", "vision-card");
@@ -476,9 +513,11 @@ function buildRestructure(container, data) {
       pos.style.left = (t.x / 680 * 100) + "%";
       pos.style.top = (t.y / 630 * 100) + "%";
       if (on) {
+        // HelpBnk genuinely becomes Dream App; everyone else keeps its own name and
+        // simply moves under its wedge (DreamBrew stays DreamBrew, tagged Portfolio).
         const ramp = item.key === "hub" ? RAMPS.accent : RAMPS[data.divisions[item.key].style];
         chip.style.background = ramp.fill; chip.style.borderColor = ramp.stroke; chip.style.color = ramp.title;
-        chip.textContent = item.key === "hub" ? data.hub.label : data.divisions[item.key].label;
+        if (item.key === "hub") chip.textContent = data.hub.label;
       } else {
         chip.style.background = ""; chip.style.borderColor = ""; chip.style.color = "";
         chip.textContent = item.label;
@@ -515,44 +554,124 @@ function render(data) {
   DATA = data;
   const app = document.getElementById("app");
   app.innerHTML = "";
-  app.appendChild(el("p", "eyebrow", "Dream &middot; internal"));
-  const brandRow = el("div", "brand-row");
-  brandRow.appendChild(el("img", null, ""));
-  brandRow.lastChild.src = "dream-logo.png";
-  brandRow.lastChild.alt = "Dream";
-  app.appendChild(brandRow);
 
-  const tabNav = el("div", "tab-nav");
-  const tabRestructure = el("button", "tab-btn active", "Restructure");
-  const tabRoadmap = el("button", "tab-btn", "Roadmap");
-  tabNav.appendChild(tabRestructure); tabNav.appendChild(tabRoadmap);
-  app.appendChild(tabNav);
+  const restructureSection = el("section", "section reveal");
+  restructureSection.id = "restructure";
+  app.appendChild(restructureSection);
+  const restructureInner = el("div", "wrap");
+  restructureSection.appendChild(restructureInner);
+  buildRestructure(restructureInner, data);
 
-  const viewRoadmap = el("div", "view");
-  const viewRestructure = el("div", "view active");
-  app.appendChild(viewRestructure);
-  app.appendChild(viewRoadmap);
-
-  viewRoadmap.appendChild(el("h1", null, "Dream ecosystem <em>roadmap</em>"));
-  viewRoadmap.appendChild(el("p", "subtitle", "Drag the timeline to see the ecosystem wheel fill in as each phase lands."));
+  const roadmapSection = el("section", "section alt reveal");
+  roadmapSection.id = "roadmap";
+  app.appendChild(roadmapSection);
+  const roadmapInner = el("div", "wrap");
+  roadmapSection.appendChild(roadmapInner);
+  roadmapInner.appendChild(el("p", "eyebrow", "Dream &middot; internal roadmap"));
+  roadmapInner.appendChild(el("h1", null, "Dream ecosystem <em>roadmap</em>"));
+  roadmapInner.appendChild(el("p", "subtitle", "Drag the timeline to see the ecosystem wheel fill in as each phase lands."));
   const wheelHost = el("div");
-  viewRoadmap.appendChild(wheelHost);
+  roadmapInner.appendChild(wheelHost);
   buildWheel(wheelHost, data);
 
-  buildRestructure(viewRestructure, data);
-
-  function activate(tab) {
-    const isRoadmap = tab === "roadmap";
-    tabRoadmap.classList.toggle("active", isRoadmap);
-    tabRestructure.classList.toggle("active", !isRoadmap);
-    viewRoadmap.classList.toggle("active", isRoadmap);
-    viewRestructure.classList.toggle("active", !isRoadmap);
-  }
-  tabRoadmap.addEventListener("click", () => activate("roadmap"));
-  tabRestructure.addEventListener("click", () => activate("restructure"));
+  const nav = document.getElementById("siteNav");
+  nav.hidden = false;
+  nav.innerHTML = "";
+  const navRestructure = el("a", "magnetic active", "Restructure");
+  navRestructure.href = "#restructure";
+  const navRoadmap = el("a", "magnetic", "Roadmap");
+  navRoadmap.href = "#roadmap";
+  nav.appendChild(navRestructure); nav.appendChild(navRoadmap);
 
   const when = data.generatedAt ? new Date(data.generatedAt).toLocaleDateString() : "";
   document.getElementById("foot").textContent = when ? "Roadmap as of " + when : "";
+
+  initEffects();
+}
+
+/* ---------- Cool-but-restrained motion layer ---------- */
+function initEffects() {
+  // Scroll reveal
+  const revealEls = document.querySelectorAll(".reveal");
+  if (prefersReduced) {
+    revealEls.forEach(e => e.classList.add("is-visible"));
+  } else if ("IntersectionObserver" in window) {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("is-visible");
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    revealEls.forEach(e => io.observe(e));
+  } else {
+    revealEls.forEach(e => e.classList.add("is-visible"));
+  }
+
+  // Scrollspy nav
+  const sections = [document.getElementById("restructure"), document.getElementById("roadmap")].filter(Boolean);
+  const navLinks = Array.from(document.querySelectorAll("#siteNav a"));
+  if (sections.length && navLinks.length && "IntersectionObserver" in window) {
+    const spy = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          navLinks.forEach(a => a.classList.toggle("active", a.getAttribute("href") === "#" + entry.target.id));
+        }
+      });
+    }, { rootMargin: "-45% 0px -50% 0px" });
+    sections.forEach(s => spy.observe(s));
+  }
+  navLinks.forEach(a => {
+    a.addEventListener("click", e => {
+      e.preventDefault();
+      const target = document.querySelector(a.getAttribute("href"));
+      if (target) target.scrollIntoView({ behavior: prefersReduced ? "auto" : "smooth", block: "start" });
+    });
+  });
+
+  // Scroll progress bar
+  const bar = document.getElementById("scrollProgress");
+  let ticking = false;
+  function updateProgress() {
+    const h = document.documentElement;
+    const max = h.scrollHeight - h.clientHeight;
+    bar.style.width = (max > 0 ? (h.scrollTop / max) * 100 : 0) + "%";
+    ticking = false;
+  }
+  window.addEventListener("scroll", () => { if (!ticking) { requestAnimationFrame(updateProgress); ticking = true; } }, { passive: true });
+  updateProgress();
+
+  initCursor();
+  initMagnetic();
+}
+
+function initCursor() {
+  if (prefersReduced || window.matchMedia("(pointer: coarse)").matches) return;
+  const dot = document.getElementById("cursorDot");
+  let shown = false;
+  window.addEventListener("mousemove", e => {
+    if (!shown) { dot.classList.add("active"); shown = true; }
+    dot.style.left = e.clientX + "px";
+    dot.style.top = e.clientY + "px";
+    const target = e.target.closest("button, a, .chip");
+    dot.classList.toggle("hover", !!target);
+  }, { passive: true });
+  window.addEventListener("mouseleave", () => dot.classList.remove("active"));
+}
+
+function initMagnetic() {
+  if (prefersReduced || window.matchMedia("(pointer: coarse)").matches) return;
+  document.querySelectorAll(".magnetic").forEach(elm => {
+    elm.style.transition = elm.style.transition || "transform .3s var(--ease)";
+    elm.addEventListener("mousemove", e => {
+      const rect = elm.getBoundingClientRect();
+      const x = (e.clientX - rect.left - rect.width / 2) * 0.3;
+      const y = (e.clientY - rect.top - rect.height / 2) * 0.3;
+      elm.style.transform = "translate(" + x.toFixed(1) + "px," + y.toFixed(1) + "px)";
+    });
+    elm.addEventListener("mouseleave", () => { elm.style.transform = "translate(0,0)"; });
+  });
 }
 
 /* ---------- Decryption (in-browser, password never leaves the device) ---------- */
@@ -569,16 +688,17 @@ async function decryptRoadmap(enc, password) {
 }
 
 function showError(msg) {
-  document.getElementById("app").innerHTML = '<p style="color:#a53a24">' + esc(msg) + '</p>';
+  document.getElementById("app").innerHTML = '<div class="gate-wrap"><p style="color:#a53a24">' + esc(msg) + '</p></div>';
 }
 
 function showGate(enc) {
   const app = document.getElementById("app");
   app.innerHTML = "";
+  const wrap = el("div", "gate-wrap");
   const g = el("div", "gate");
   g.appendChild(el("div", "lock", "🔒"));
-  g.appendChild(el("h2", null, "Dream ecosystem roadmap"));
-  g.appendChild(el("p", null, "Enter the password to unlock the roadmap. It decrypts on this device only."));
+  g.appendChild(el("h2", null, "Dream: restructure &amp; roadmap"));
+  g.appendChild(el("p", null, "Enter the password to unlock. It decrypts on this device only."));
   const input = el("input");
   input.type = "password"; input.placeholder = "Password"; input.autocomplete = "current-password";
   const btn = el("button", null, "Unlock");
@@ -586,7 +706,8 @@ function showGate(enc) {
   const remember = el("input"); remember.type = "checkbox"; remember.checked = true;
   const rememberLabel = el("label"); rememberLabel.appendChild(remember); rememberLabel.appendChild(document.createTextNode("Remember on this device"));
   g.appendChild(input); g.appendChild(btn); g.appendChild(err); g.appendChild(rememberLabel);
-  app.appendChild(g);
+  wrap.appendChild(g);
+  app.appendChild(wrap);
   input.focus();
 
   const attempt = async () => {
