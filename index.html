@@ -83,6 +83,41 @@
   footer { text-align: center; color: var(--text-muted); font-size: 11px; margin-top: 22px; }
   footer a { color: var(--text-muted); text-decoration: underline; cursor: pointer; }
 
+  /* Tabs */
+  .tab-nav { display: flex; gap: 8px; margin: 6px 0 20px; }
+  .tab-btn { font-family: var(--font-sans); font-weight: 700; font-size: 13px; padding: 9px 18px; border-radius: 20px; border: 1px solid var(--border); background: var(--surface-1); color: var(--text-secondary); cursor: pointer; }
+  .tab-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* Restructure view */
+  .restructure-row { display: grid; grid-template-columns: minmax(380px, 620px) 1fr; gap: 32px; align-items: start; margin-top: 1.1rem; }
+  @media (max-width: 900px) { .restructure-row { grid-template-columns: 1fr; } }
+  .stage { position: relative; width: 100%; aspect-ratio: 680 / 630; }
+  .stage svg.stage-wheel { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; transition: opacity 1.1s ease; }
+  .stage.restructured svg.stage-wheel { opacity: 1; }
+  .chip-pos { position: absolute; transform: translate(-50%, -50%); transition: left 1.3s cubic-bezier(.22,1,.36,1), top 1.3s cubic-bezier(.22,1,.36,1); }
+  .chip { background: var(--surface-1); border: 1.5px solid var(--border-strong); border-radius: 10px; padding: 9px 15px; font-family: var(--font-serif); font-weight: 700; font-size: 13.5px; color: var(--text-primary); box-shadow: var(--shadow); white-space: nowrap; display: inline-block; animation: chipFloat 4s ease-in-out infinite; transition: background .6s, border-color .6s, color .6s, border-radius .4s; }
+  .stage.restructured .chip { animation: none; border-radius: 8px; }
+  @keyframes chipFloat { 0%, 100% { transform: translateY(0) rotate(var(--rot, 0deg)); } 50% { transform: translateY(-8px) rotate(var(--rot, 0deg)); } }
+  .new-chip-pos { position: absolute; transform: translate(-50%, -50%) scale(0); transition: transform .55s cubic-bezier(.34,1.56,.64,1); }
+  .new-chip-pos.show { transform: translate(-50%, -50%) scale(1); }
+  .new-chip-pos .chip { position: relative; animation: none; }
+  .new-badge { position: absolute; top: -9px; right: -11px; background: var(--accent); color: #fff; font-size: 9px; font-weight: 800; letter-spacing: .3px; padding: 2px 6px; border-radius: 20px; box-shadow: var(--shadow); font-family: var(--font-sans); }
+  .chip-glow { animation: glowPulse 1.3s ease-out 2; }
+  @keyframes glowPulse { 0% { box-shadow: 0 0 0 0 rgba(255,91,0,.5); } 100% { box-shadow: 0 0 0 20px rgba(255,91,0,0); } }
+  .restructure-btn { margin-top: 20px; padding: 12px 22px; font-size: 14px; font-weight: 700; font-family: var(--font-sans); color: #fff; background: var(--accent); border: none; border-radius: 10px; cursor: pointer; box-shadow: var(--shadow); }
+  .restructure-btn.is-reset { background: var(--text-primary); }
+  .stage-caption { margin-top: 14px; font-size: 13.5px; color: var(--text-secondary); min-height: 20px; }
+  .vision-card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; box-shadow: var(--shadow); }
+  .vision-card p.vc-heading { font-size: 13px; font-weight: 700; color: var(--accent-dark); text-transform: uppercase; letter-spacing: 0.8px; margin: 0 0 12px; }
+  .vision-card ul { margin: 0; padding-left: 18px; font-size: 13.5px; color: var(--text-secondary); line-height: 1.85; }
+  .vision-card ul li::marker { color: var(--accent); }
+  @media (max-width: 480px) {
+    .chip { font-size: 10.5px; padding: 5px 9px; border-radius: 7px; }
+    .new-badge { font-size: 7.5px; padding: 1px 4px; top: -7px; right: -8px; }
+  }
+
   /* Password gate */
   .gate { max-width: 340px; margin: 12vh auto 0; text-align: center; }
   .gate .lock { font-size: 34px; }
@@ -355,21 +390,166 @@ function buildWheel(container, data) {
   setPhase(1);
 }
 
+function buildRestructure(container, data) {
+  container.innerHTML = "";
+  const r = data.restructure;
+
+  container.appendChild(el("p", "eyebrow", r.eyebrow));
+  container.appendChild(el("h1", null, r.headline));
+  container.appendChild(el("p", "subtitle", r.subtitle));
+
+  const row = el("div", "restructure-row");
+  container.appendChild(row);
+  const stageCol = el("div");
+  const visionCol = el("div");
+  row.appendChild(stageCol);
+  row.appendChild(visionCol);
+
+  const stage = el("div", "stage");
+  stageCol.appendChild(stage);
+
+  // Ghost wheel, fades in on restructure
+  const svg = document.createElementNS(svgns, "svg");
+  svg.setAttribute("class", "stage-wheel"); svg.setAttribute("viewBox", "0 0 680 630");
+  WEDGES.forEach(w => {
+    const p = document.createElementNS(svgns, "path");
+    p.setAttribute("d", w.d);
+    const ramp = RAMPS[data.divisions[w.key].style];
+    p.setAttribute("fill", ramp.fill); p.setAttribute("stroke", ramp.stroke); p.setAttribute("stroke-width", "1");
+    svg.appendChild(p);
+  });
+  const hubShape = document.createElementNS(svgns, "circle");
+  hubShape.setAttribute("cx", "340"); hubShape.setAttribute("cy", "350"); hubShape.setAttribute("r", "90");
+  hubShape.setAttribute("fill", RAMPS.accent.fill); hubShape.setAttribute("stroke", RAMPS.accent.stroke); hubShape.setAttribute("stroke-width", "1");
+  svg.appendChild(hubShape);
+  stage.appendChild(svg);
+
+  // Scattered starting chips
+  const chipEls = {};
+  r.scattered.forEach(item => {
+    const pos = el("div", "chip-pos");
+    pos.style.left = (item.x / 680 * 100) + "%";
+    pos.style.top = (item.y / 630 * 100) + "%";
+    const chip = el("div", "chip", esc(item.label));
+    chip.style.setProperty("--rot", item.rot + "deg");
+    pos.appendChild(chip);
+    stage.appendChild(pos);
+    chipEls[item.key] = { pos, chip };
+  });
+
+  // Target positions match the roadmap wheel's wedge/hub geometry
+  const targets = { hub: { x: 340, y: 350 } };
+  WEDGES.forEach(w => { targets[w.key] = { x: w.lx, y: w.ly }; });
+
+  // New-venture chips, hidden until restructure
+  const newChipEls = {};
+  r.newKeys.forEach(key => {
+    const t = targets[key];
+    const pos = el("div", "new-chip-pos");
+    pos.style.left = (t.x / 680 * 100) + "%";
+    pos.style.top = (t.y / 630 * 100) + "%";
+    const chip = el("div", "chip", esc(data.divisions[key].label));
+    const badge = el("div", "new-badge", "NEW");
+    pos.appendChild(chip); pos.appendChild(badge);
+    stage.appendChild(pos);
+    newChipEls[key] = pos;
+  });
+
+  const caption = el("div", "stage-caption", esc(r.beforeCaption));
+  stageCol.appendChild(caption);
+  const btn = el("button", "restructure-btn", "Restructure");
+  stageCol.appendChild(btn);
+
+  const vc = el("div", "vision-card");
+  vc.appendChild(el("p", "vc-heading", "The vision"));
+  const ul = el("ul");
+  r.vision.forEach(v => ul.appendChild(el("li", null, esc(v))));
+  vc.appendChild(ul);
+  visionCol.appendChild(vc);
+
+  let restructured = false;
+  function applyState(on) {
+    stage.classList.toggle("restructured", on);
+    r.scattered.forEach(item => {
+      const { pos, chip } = chipEls[item.key];
+      const t = on ? targets[item.key] : { x: item.x, y: item.y };
+      pos.style.left = (t.x / 680 * 100) + "%";
+      pos.style.top = (t.y / 630 * 100) + "%";
+      if (on) {
+        const ramp = item.key === "hub" ? RAMPS.accent : RAMPS[data.divisions[item.key].style];
+        chip.style.background = ramp.fill; chip.style.borderColor = ramp.stroke; chip.style.color = ramp.title;
+        chip.textContent = item.key === "hub" ? data.hub.label : data.divisions[item.key].label;
+      } else {
+        chip.style.background = ""; chip.style.borderColor = ""; chip.style.color = "";
+        chip.textContent = item.label;
+      }
+    });
+    Object.values(newChipEls).forEach(pos => {
+      pos.classList.remove("show");
+      pos.querySelector(".chip").classList.remove("chip-glow");
+    });
+    caption.textContent = on ? "" : r.beforeCaption;
+    btn.textContent = on ? "Reset" : "Restructure";
+    btn.classList.toggle("is-reset", on);
+
+    if (on) {
+      r.newKeys.forEach((key, i) => {
+        setTimeout(() => {
+          const pos = newChipEls[key];
+          pos.classList.add("show");
+          const chip = pos.querySelector(".chip");
+          const ramp = RAMPS[data.divisions[key].style];
+          chip.style.background = ramp.fill; chip.style.borderColor = ramp.stroke; chip.style.color = ramp.title;
+          chip.classList.add("chip-glow");
+        }, 1300 + i * 300);
+      });
+      setTimeout(() => { caption.textContent = r.afterCaption; }, 1300 + r.newKeys.length * 300 + 300);
+    }
+  }
+
+  btn.addEventListener("click", () => { restructured = !restructured; applyState(restructured); });
+  applyState(false);
+}
+
 function render(data) {
   DATA = data;
   const app = document.getElementById("app");
   app.innerHTML = "";
-  app.appendChild(el("p", "eyebrow", "Dream &middot; internal roadmap"));
+  app.appendChild(el("p", "eyebrow", "Dream &middot; internal"));
   const brandRow = el("div", "brand-row");
   brandRow.appendChild(el("img", null, ""));
   brandRow.lastChild.src = "dream-logo.png";
   brandRow.lastChild.alt = "Dream";
-  brandRow.appendChild(el("h1", null, "ecosystem <em>roadmap</em>"));
   app.appendChild(brandRow);
-  app.appendChild(el("p", "subtitle", "Drag the timeline to see the ecosystem wheel fill in as each phase lands."));
+
+  const tabNav = el("div", "tab-nav");
+  const tabRestructure = el("button", "tab-btn active", "Restructure");
+  const tabRoadmap = el("button", "tab-btn", "Roadmap");
+  tabNav.appendChild(tabRestructure); tabNav.appendChild(tabRoadmap);
+  app.appendChild(tabNav);
+
+  const viewRoadmap = el("div", "view");
+  const viewRestructure = el("div", "view active");
+  app.appendChild(viewRestructure);
+  app.appendChild(viewRoadmap);
+
+  viewRoadmap.appendChild(el("h1", null, "Dream ecosystem <em>roadmap</em>"));
+  viewRoadmap.appendChild(el("p", "subtitle", "Drag the timeline to see the ecosystem wheel fill in as each phase lands."));
   const wheelHost = el("div");
-  app.appendChild(wheelHost);
+  viewRoadmap.appendChild(wheelHost);
   buildWheel(wheelHost, data);
+
+  buildRestructure(viewRestructure, data);
+
+  function activate(tab) {
+    const isRoadmap = tab === "roadmap";
+    tabRoadmap.classList.toggle("active", isRoadmap);
+    tabRestructure.classList.toggle("active", !isRoadmap);
+    viewRoadmap.classList.toggle("active", isRoadmap);
+    viewRestructure.classList.toggle("active", !isRoadmap);
+  }
+  tabRoadmap.addEventListener("click", () => activate("roadmap"));
+  tabRestructure.addEventListener("click", () => activate("restructure"));
 
   const when = data.generatedAt ? new Date(data.generatedAt).toLocaleDateString() : "";
   document.getElementById("foot").textContent = when ? "Roadmap as of " + when : "";
