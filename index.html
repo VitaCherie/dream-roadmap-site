@@ -160,8 +160,8 @@
   .stage.restructured .chip-tag { opacity: 1; transition: opacity .5s ease 1.05s; }
   .new-chip-pos { position: absolute; transform: translate(-50%, -50%) scale(0); transition: transform .55s cubic-bezier(.34,1.56,.64,1); }
   .new-chip-pos.show { transform: translate(-50%, -50%) scale(1); }
-  .new-chip-pos .chip { animation: none; }
-  .new-badge { position: absolute; top: -9px; right: -11px; background: var(--accent); color: #fff; font-size: 9px; font-weight: 800; letter-spacing: .3px; padding: 2px 6px; border-radius: 20px; box-shadow: var(--shadow); font-family: var(--font-sans); }
+  .new-chip-pos .chip { animation: none; padding: 8px 10px 8px 0; }
+  .new-badge { position: absolute; top: -14px; right: -6px; background: var(--accent); color: #fff; font-size: 9px; font-weight: 800; letter-spacing: .3px; padding: 2px 6px; border-radius: 20px; box-shadow: var(--shadow); font-family: var(--font-sans); }
   .chip-glow { animation: glowPulse 1.3s ease-out 2; }
   @keyframes glowPulse { 0% { box-shadow: 0 0 0 0 rgba(255,91,0,.5); } 100% { box-shadow: 0 0 0 20px rgba(255,91,0,0); } }
   .restructure-btn { margin-top: 20px; padding: 12px 22px; font-size: 14px; font-weight: 700; font-family: var(--font-sans); color: #fff; background: var(--accent); border: none; border-radius: 10px; cursor: pointer; box-shadow: var(--shadow); transition: transform .3s var(--ease), background .3s; }
@@ -182,31 +182,56 @@
   }
 
   /* Org chart */
-  .org-standalone { margin-top: 3rem; max-width: 640px; }
-  .org-chart { display: flex; flex-direction: column; align-items: center; margin-top: 1.5rem; }
-  .org-node { background: var(--text-primary); color: #fff; font-weight: 700; font-size: 13px; padding: 12px 22px; border-radius: 10px; text-align: center; box-shadow: var(--shadow); transition: background .35s, color .35s, box-shadow .35s, transform .35s; }
-  .org-node.highlight { background: var(--accent); box-shadow: 0 0 0 5px rgba(255,91,0,.18); transform: scale(1.04); }
-  .org-line { width: 1.5px; height: 22px; background: var(--border-strong); }
-  .org-shared-wrap { border: 1px dashed var(--border-strong); border-radius: 16px; padding: 20px; background: var(--surface-1); width: 100%; }
-  .org-shared-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
-  .org-shared-row .org-node { background: rgba(66,45,35,.7); font-size: 12px; padding: 10px 16px; box-shadow: none; }
-  .org-businesses { display: flex; gap: 18px; justify-content: center; flex-wrap: wrap; width: 100%; margin-top: 0; }
-  .org-biz-col { display: flex; flex-direction: column; align-items: center; flex: 1; min-width: 130px; }
-  .org-biz { background: var(--accent-soft); color: var(--accent-dark); border: 1.5px solid var(--accent); font-size: 13px; }
-  .org-biz.highlight { background: var(--accent); color: #fff; }
-  .org-note { font-size: 9.5px; font-weight: 400; font-style: italic; color: var(--text-muted); margin-top: 4px; max-width: 140px; }
-  .org-biz.highlight + .org-note { color: var(--accent-dark); }
-  .org-children { display: flex; flex-direction: column; align-items: center; margin-top: 14px; }
-  .org-child { background: var(--surface-1); border: 1px solid var(--border-strong); color: var(--text-primary); font-size: 11.5px; margin-top: 10px; padding: 9px 14px; box-shadow: var(--shadow); }
-  @media (max-width: 480px) { .org-node { font-size: 11.5px; padding: 10px 14px; } .org-shared-row .org-node { font-size: 10.5px; padding: 8px 12px; } }
+  .org-standalone { margin-top: 3rem; max-width: 760px; }
+  .org-svg { display: block; margin-top: 1.5rem; }
 
-  /* Journey: static flows */
-  .flows-wrap { margin-top: 1.5rem; }
-  .flow-row { margin-bottom: 26px; }
-  .flow-path-label { font-weight: 700; font-size: 13px; color: var(--accent-dark); text-transform: uppercase; letter-spacing: .5px; margin: 0 0 12px; }
-  .flow-steps { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
-  .flow-chip { background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px; padding: 11px 15px; font-size: 12.5px; font-weight: 600; color: var(--text-primary); box-shadow: var(--shadow); max-width: 220px; line-height: 1.4; }
-  .flow-arrow { color: var(--accent); font-size: 18px; font-weight: 700; flex-shrink: 0; }
+  /* Journey: path tabs + phone mockups */
+  .path-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 1.5rem; }
+  .path-tab { font-family: var(--font-sans); font-weight: 700; font-size: 12.5px; padding: 9px 18px; border-radius: 20px; border: 1px solid var(--border); background: var(--surface-1); color: var(--text-secondary); cursor: pointer; transition: background .3s, color .3s, border-color .3s; }
+  .path-tab.active { background: var(--text-primary); border-color: var(--text-primary); color: #fff; }
+  .phone-row { display: flex; gap: 18px; overflow-x: auto; padding: 6px 2px 14px; margin-top: 22px; }
+  .phone { flex: 0 0 148px; width: 148px; }
+  .phone-frame { background: var(--text-primary); border-radius: 22px; padding: 8px; box-shadow: var(--shadow); }
+  .phone-screen { background: #fff; border-radius: 15px; aspect-ratio: 9 / 18; overflow: hidden; display: flex; flex-direction: column; }
+  .phone-caption { margin-top: 10px; font-size: 11.5px; color: var(--text-secondary); line-height: 1.4; text-align: center; }
+
+  .scr-social { display: flex; flex-direction: column; height: 100%; }
+  .scr-social-header { font-family: var(--font-serif); font-weight: 700; font-size: 11px; color: var(--accent-dark); padding: 10px 10px 6px; }
+  .scr-video { flex: 1; background: linear-gradient(160deg, var(--accent-soft), var(--border)); display: flex; align-items: center; justify-content: center; }
+  .scr-play { width: 30px; height: 30px; border-radius: 50%; background: #fff; color: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 11px; box-shadow: var(--shadow); }
+  .scr-social-caption { font-size: 10px; color: var(--text-secondary); padding: 8px 10px; margin: 0; line-height: 1.4; }
+
+  .scr-ad { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; padding: 14px; text-align: center; gap: 10px; background: var(--surface-2); }
+  .scr-tag { font-size: 8.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; color: var(--text-muted); background: #fff; padding: 2px 8px; border-radius: 10px; }
+  .scr-ad-mark img { height: 26px; }
+  .scr-ad-text { font-size: 11px; font-weight: 700; color: var(--text-primary); margin: 0; line-height: 1.3; }
+  .scr-cta { background: var(--accent); color: #fff; font-size: 10px; font-weight: 700; padding: 6px 16px; border-radius: 16px; }
+
+  .scr-chat { display: flex; flex-direction: column; justify-content: flex-end; height: 100%; padding: 12px; gap: 8px; background: var(--surface-2); }
+  .scr-bubble { background: #fff; border-radius: 12px; padding: 8px 11px; font-size: 10px; color: var(--text-primary); align-self: flex-start; box-shadow: var(--shadow); }
+  .scr-bubble.scr-link { display: flex; align-items: center; gap: 6px; font-weight: 700; color: var(--accent-dark); }
+  .scr-bubble.scr-link img { height: 12px; }
+
+  .scr-home { display: flex; flex-direction: column; height: 100%; padding: 14px 10px; background: var(--surface-2); }
+  .scr-app-grid { flex: 1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; align-content: center; }
+  .scr-tile { aspect-ratio: 1; background: var(--border); border-radius: 8px; }
+  .scr-tile--app { background: #fff; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 0 2px var(--accent); }
+  .scr-tile--app img { width: 70%; }
+  .scr-tap-hint { font-size: 9px; color: var(--text-muted); text-align: center; margin: 8px 0 0; }
+
+  .scr-menu { display: flex; flex-direction: column; height: 100%; padding: 14px 10px; gap: 6px; }
+  .scr-menu-item { font-size: 10.5px; font-weight: 600; color: var(--text-secondary); padding: 9px 10px; border-radius: 8px; }
+  .scr-menu-item.is-on { background: var(--accent-soft); color: var(--accent-dark); font-weight: 700; }
+
+  .scr-dashboard { display: flex; flex-direction: column; justify-content: center; height: 100%; padding: 16px; gap: 8px; }
+  .scr-dash-label { font-size: 10px; color: var(--text-muted); margin: 0; text-transform: uppercase; letter-spacing: .3px; }
+  .scr-progress-track { height: 8px; background: var(--border); border-radius: 6px; overflow: hidden; }
+  .scr-progress-fill { height: 100%; background: var(--accent); border-radius: 6px; }
+  .scr-dash-value { font-size: 12px; font-weight: 700; color: var(--text-primary); margin: 0; }
+
+  .scr-retain { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; padding: 16px; gap: 10px; text-align: center; }
+  .scr-badge { font-size: 10.5px; font-weight: 700; color: var(--accent-dark); background: var(--accent-soft); padding: 6px 12px; border-radius: 14px; }
+  .scr-retain-text { font-size: 10.5px; color: var(--text-secondary); margin: 0; line-height: 1.4; }
   .compare-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 32px; }
   @media (max-width: 700px) { .compare-row { grid-template-columns: 1fr; } }
   .compare-card { border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; background: var(--surface-1); }
@@ -717,73 +742,204 @@ function buildIntro(container, data) {
 }
 
 /* ---------- Org chart ---------- */
-function buildOrgChart(container, data, sizeClass) {
+function buildOrgChart(container, data) {
   const o = data.orgChart;
-  const chart = el("div", "org-chart" + (sizeClass ? " " + sizeClass : ""));
-  chart.appendChild(el("div", "org-node", esc(o.group)));
-  chart.appendChild(el("div", "org-line"));
-  chart.appendChild(el("div", "org-node", esc(o.board)));
-  chart.appendChild(el("div", "org-line"));
-  chart.appendChild(el("div", "org-node", esc(o.ceo)));
-  chart.appendChild(el("div", "org-line"));
+  const n = o.businesses.length;
+  const hubIdx = o.businesses.findIndex(b => b.key === "hub");
+  const colGap = 240;
+  const colXs = o.businesses.map((_, i) => (i - hubIdx) * colGap);
+  const CX = 0;
+  const leftEdge = Math.min(...colXs) - 85, rightEdge = Math.max(...colXs) + 85;
+  const boxW = 170, boxH = 48, topW = 170, topH = 44;
 
-  const sharedWrap = el("div", "org-shared-wrap");
-  const sharedRow = el("div", "org-shared-row");
-  o.shared.forEach(s => sharedRow.appendChild(el("div", "org-node", esc(s))));
-  sharedWrap.appendChild(sharedRow);
-  chart.appendChild(sharedWrap);
-  chart.appendChild(el("div", "org-line"));
+  const groupY = 30, boardY = 100, ceoY = 170;
+  const sharedTop = 218, sharedH = 100, sharedBottom = sharedTop + sharedH;
+  const busY = 358;
+  const bizTop = 398, bizCenterY = bizTop + boxH / 2;
+  const branchY = 462, childTop = 476, childH = 40;
 
-  const biz = el("div", "org-businesses");
-  o.businesses.forEach(b => {
-    const col = el("div", "org-biz-col");
-    const node = el("div", "org-node org-biz", esc(b.label));
-    node.dataset.key = b.key;
-    col.appendChild(node);
-    if (b.note) col.appendChild(el("div", "org-note", esc(b.note)));
-    if (b.children) {
-      const kids = el("div", "org-children");
-      b.children.forEach(ch => {
-        const cnode = el("div", "org-node org-child", esc(ch.label));
-        cnode.dataset.key = ch.key;
-        kids.appendChild(cnode);
-        if (ch.note) kids.appendChild(el("div", "org-note", esc(ch.note)));
-      });
-      col.appendChild(kids);
-    }
-    biz.appendChild(col);
-  });
-  chart.appendChild(biz);
-  container.appendChild(chart);
+  const svg = document.createElementNS(svgns, "svg");
+  const vbW = rightEdge - leftEdge + 100;
+  svg.setAttribute("viewBox", `${leftEdge - 50} 0 ${vbW} 540`);
+  svg.setAttribute("width", "100%");
+  svg.classList.add("org-svg");
 
-  return function highlight(keys) {
-    chart.querySelectorAll("[data-key]").forEach(n => {
-      n.classList.toggle("highlight", keys.includes(n.dataset.key));
-    });
+  const line = (x1, y1, x2, y2, dash) => {
+    const l = document.createElementNS(svgns, "line");
+    l.setAttribute("x1", x1); l.setAttribute("y1", y1); l.setAttribute("x2", x2); l.setAttribute("y2", y2);
+    l.setAttribute("stroke", "var(--border-strong)"); l.setAttribute("stroke-width", "1.5");
+    if (dash) l.setAttribute("stroke-dasharray", dash);
+    svg.appendChild(l);
   };
+  const box = (x, y, w, h, label, opts) => {
+    opts = opts || {};
+    const g = document.createElementNS(svgns, "g");
+    const r = document.createElementNS(svgns, "rect");
+    r.setAttribute("x", x - w/2); r.setAttribute("y", y - h/2); r.setAttribute("width", w); r.setAttribute("height", h);
+    r.setAttribute("rx", opts.rx || 10);
+    r.setAttribute("fill", opts.fill || "var(--text-primary)");
+    if (opts.stroke) { r.setAttribute("stroke", opts.stroke); r.setAttribute("stroke-width", "1.5"); }
+    if (opts.dash) r.setAttribute("stroke-dasharray", opts.dash);
+    g.appendChild(r);
+    const t = document.createElementNS(svgns, "text");
+    t.setAttribute("x", x); t.setAttribute("y", y);
+    t.setAttribute("text-anchor", "middle"); t.setAttribute("dominant-baseline", "central");
+    t.style.cssText = `font-family:var(--font-sans);font-weight:700;font-size:${opts.fontSize||13}px;fill:${opts.color||"#fff"}`;
+    t.textContent = label;
+    g.appendChild(t);
+    svg.appendChild(g);
+    return { top: y - h/2, bottom: y + h/2 };
+  };
+
+  line(CX, groupY + topH/2, CX, boardY - topH/2);
+  line(CX, boardY + topH/2, CX, ceoY - topH/2);
+  line(CX, ceoY + topH/2, CX, sharedTop);
+  box(CX, groupY, topW, topH, o.group);
+  box(CX, boardY, topW, topH, o.board);
+  box(CX, ceoY, topW, topH, o.ceo);
+
+  const sharedRect = document.createElementNS(svgns, "rect");
+  sharedRect.setAttribute("x", leftEdge); sharedRect.setAttribute("y", sharedTop);
+  sharedRect.setAttribute("width", rightEdge - leftEdge); sharedRect.setAttribute("height", sharedH);
+  sharedRect.setAttribute("rx", 14); sharedRect.setAttribute("fill", "var(--surface-1)");
+  sharedRect.setAttribute("stroke", "var(--border-strong)"); sharedRect.setAttribute("stroke-dasharray", "5 4");
+  svg.appendChild(sharedRect);
+  const pillW = 130, pillGap = 16;
+  const pillsTotal = o.shared.length * pillW + (o.shared.length - 1) * pillGap;
+  let pillX = CX - pillsTotal/2 + pillW/2;
+  o.shared.forEach(s => {
+    box(pillX, sharedTop + sharedH/2, pillW, 40, s, { fill: "rgba(66,45,35,.7)", fontSize: 12 });
+    pillX += pillW + pillGap;
+  });
+
+  line(CX, sharedBottom, CX, busY);
+  line(colXs[0], busY, colXs[n-1], busY);
+  o.businesses.forEach((b, i) => line(colXs[i], busY, colXs[i], bizTop));
+
+  o.businesses.forEach((b, i) => {
+    const isHub = b.key === "hub";
+    const rect = box(colXs[i], bizCenterY, boxW, boxH, b.label, isHub
+      ? { fill: "var(--accent)", fontSize: 14 }
+      : { fill: "var(--accent-soft)", color: "var(--accent-dark)", stroke: "var(--accent)" });
+    if (b.children) {
+      if (b.children.length > 1) {
+        const kidGap = 150;
+        const kidXs = b.children.map((_, ci) => colXs[i] + (ci - (b.children.length-1)/2) * kidGap);
+        line(colXs[i], bizCenterY + boxH/2, colXs[i], branchY);
+        line(kidXs[0], branchY, kidXs[kidXs.length-1], branchY);
+        kidXs.forEach(kx => line(kx, branchY, kx, childTop));
+        b.children.forEach((ch, ci) => box(kidXs[ci], childTop + childH/2, 140, childH, ch.label, { fill: "var(--surface-1)", color: "var(--text-primary)", stroke: "var(--border-strong)", fontSize: 12 }));
+      } else {
+        line(colXs[i], bizCenterY + boxH/2, colXs[i], childTop);
+        box(colXs[i], childTop + childH/2, 140, childH, b.children[0].label, { fill: "var(--surface-1)", color: "var(--text-primary)", stroke: "var(--border-strong)", fontSize: 12 });
+      }
+    }
+  });
+
+  container.appendChild(svg);
 }
 
-/* ---------- Customer journey ---------- */
+/* ---------- Customer journey (phone mockups) ---------- */
+const PATH_SCREENS = {
+  media: [
+    { kind: "social", caption: "Simon: how I'd start today" },
+    { kind: "appicon" },
+    { kind: "menu", items: [{ label: "Home" }, { label: "DreamFund", on: true }, { label: "Dream Spaces", on: true }, { label: "Settings" }] },
+    { kind: "dashboard", label: "Your first month", pct: 62, value: "$6.2k of $10k goal" }
+  ],
+  paid: [
+    { kind: "ad", text: "Start your business today", cta: "Download" },
+    { kind: "appicon" },
+    { kind: "menu", items: [{ label: "Home" }, { label: "Dream Bank", on: true }, { label: "DreamFund", on: true }, { label: "Settings" }] },
+    { kind: "retention", badge: "Active member", text: "Tracked the same way, any entry point" }
+  ],
+  referral: [
+    { kind: "chat", text: "You'd love this", link: "Dream App" },
+    { kind: "appicon" },
+    { kind: "menu", items: [{ label: "Home" }, { label: "DreamBrew", on: true }, { label: "Dream Spaces", on: true }, { label: "Portfolio", on: true }] },
+    { kind: "retention", badge: "12 months in", text: "Still part of the ecosystem" }
+  ]
+};
+
+function buildPhoneScreen(s) {
+  if (s.kind === "social") {
+    return el("div", "scr-social",
+      '<div class="scr-social-header">Dream Media</div>' +
+      '<div class="scr-video"><div class="scr-play">&#9654;</div></div>' +
+      '<p class="scr-social-caption">' + esc(s.caption) + '</p>');
+  }
+  if (s.kind === "ad") {
+    return el("div", "scr-ad",
+      '<div class="scr-tag">Sponsored</div>' +
+      '<div class="scr-ad-mark"><img src="dream-logo.png" alt="Dream"/></div>' +
+      '<p class="scr-ad-text">' + esc(s.text) + '</p>' +
+      '<div class="scr-cta">' + esc(s.cta) + '</div>');
+  }
+  if (s.kind === "chat") {
+    return el("div", "scr-chat",
+      '<div class="scr-bubble">' + esc(s.text) + '</div>' +
+      '<div class="scr-bubble scr-link"><img src="dream-logo.png" alt="Dream"/>' + esc(s.link) + '</div>');
+  }
+  if (s.kind === "appicon") {
+    return el("div", "scr-home",
+      '<div class="scr-app-grid"><div class="scr-tile"></div><div class="scr-tile"></div><div class="scr-tile"></div>' +
+      '<div class="scr-tile scr-tile--app"><img src="dream-logo.png" alt="Dream"/></div>' +
+      '<div class="scr-tile"></div><div class="scr-tile"></div></div>' +
+      '<p class="scr-tap-hint">Tap to open</p>');
+  }
+  if (s.kind === "menu") {
+    return el("div", "scr-menu", s.items.map(it =>
+      '<div class="scr-menu-item' + (it.on ? " is-on" : "") + '">' + esc(it.label) + '</div>'
+    ).join(""));
+  }
+  if (s.kind === "dashboard") {
+    return el("div", "scr-dashboard",
+      '<p class="scr-dash-label">' + esc(s.label) + '</p>' +
+      '<div class="scr-progress-track"><div class="scr-progress-fill" style="width:' + s.pct + '%"></div></div>' +
+      '<p class="scr-dash-value">' + esc(s.value) + '</p>');
+  }
+  if (s.kind === "retention") {
+    return el("div", "scr-retain",
+      '<div class="scr-badge">' + esc(s.badge) + '</div>' +
+      '<p class="scr-retain-text">' + esc(s.text) + '</p>');
+  }
+  return el("div");
+}
+
 function buildJourney(container, data) {
   const j = data.journey;
   container.appendChild(el("p", "eyebrow reveal", j.eyebrow));
   container.appendChild(el("h1", "reveal", j.headline));
   container.appendChild(el("p", "subtitle reveal", j.subtitle));
 
-  const flowsWrap = el("div", "flows-wrap reveal");
-  j.paths.forEach(path => {
-    const rowEl = el("div", "flow-row");
-    rowEl.appendChild(el("p", "flow-path-label", esc(path.label) + " &middot; " + esc(path.detail)));
-    const steps = el("div", "flow-steps");
-    path.steps.forEach((s, i) => {
-      if (i > 0) steps.appendChild(el("span", "flow-arrow", "&rarr;"));
-      const chip = el("div", "flow-chip", esc(s.label));
-      steps.appendChild(chip);
+  const tabs = el("div", "path-tabs reveal");
+  const phoneRow = el("div", "phone-row reveal");
+  container.appendChild(tabs);
+  container.appendChild(phoneRow);
+
+  let activePath = 0;
+  function renderPath() {
+    tabs.innerHTML = "";
+    j.paths.forEach((p, i) => {
+      const btn = el("button", "path-tab" + (i === activePath ? " active" : ""), esc(p.label));
+      btn.addEventListener("click", () => { activePath = i; renderPath(); });
+      tabs.appendChild(btn);
     });
-    rowEl.appendChild(steps);
-    flowsWrap.appendChild(rowEl);
-  });
-  container.appendChild(flowsWrap);
+    const path = j.paths[activePath];
+    const screens = PATH_SCREENS[path.key];
+    phoneRow.innerHTML = "";
+    path.steps.forEach((s, i) => {
+      const phone = el("div", "phone");
+      const frame = el("div", "phone-frame");
+      const screen = el("div", "phone-screen");
+      screen.appendChild(buildPhoneScreen(screens[i]));
+      frame.appendChild(screen);
+      phone.appendChild(frame);
+      phone.appendChild(el("p", "phone-caption", esc(s.label)));
+      phoneRow.appendChild(phone);
+    });
+  }
+  renderPath();
 
   const compareRow = el("div", "compare-row reveal");
   const nowCard = el("div", "compare-card");
@@ -803,7 +959,7 @@ function buildJourney(container, data) {
   orgWrap.appendChild(el("p", "eyebrow", oc.eyebrow));
   orgWrap.appendChild(el("h1", null, oc.headline));
   orgWrap.appendChild(el("p", "subtitle", oc.subtitle));
-  buildOrgChart(orgWrap, data, "org-chart--static");
+  buildOrgChart(orgWrap, data);
   container.appendChild(orgWrap);
 }
 
@@ -1000,7 +1156,7 @@ function initCursor() {
     if (!shown) { dot.classList.add("active"); shown = true; }
     dot.style.left = e.clientX + "px";
     dot.style.top = e.clientY + "px";
-    const target = e.target.closest("button, a, .chip, .flow-chip");
+    const target = e.target.closest("button, a, .chip, .path-tab, .phone");
     dot.classList.toggle("hover", !!target);
   }, { passive: true });
   window.addEventListener("mouseleave", () => dot.classList.remove("active"));
