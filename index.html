@@ -219,9 +219,10 @@
   .scr-tile--app img { width: 70%; }
   .scr-tap-hint { font-size: 9px; color: var(--text-muted); text-align: center; margin: 8px 0 0; }
 
-  .scr-menu { display: flex; flex-direction: column; height: 100%; padding: 14px 10px; gap: 6px; }
-  .scr-menu-item { font-size: 10.5px; font-weight: 600; color: var(--text-secondary); padding: 9px 10px; border-radius: 8px; }
-  .scr-menu-item.is-on { background: var(--accent-soft); color: var(--accent-dark); font-weight: 700; }
+  .scr-menu { display: flex; flex-direction: column; height: 100%; padding: 14px 12px; gap: 4px; }
+  .scr-menu-title { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: .6px; color: var(--text-muted); margin: 0 0 8px; }
+  .scr-menu-item { font-size: 10.5px; font-weight: 700; color: rgba(255,91,0,.4); padding: 8px 8px; border-radius: 8px; }
+  .scr-menu-item.is-on { background: var(--accent-soft); color: var(--accent); }
 
   .scr-dashboard { display: flex; flex-direction: column; justify-content: center; height: 100%; padding: 16px; gap: 8px; }
   .scr-dash-label { font-size: 10px; color: var(--text-muted); margin: 0; text-transform: uppercase; letter-spacing: .3px; }
@@ -840,23 +841,33 @@ function buildOrgChart(container, data) {
 }
 
 /* ---------- Customer journey (phone mockups) ---------- */
+// The ecosystem pillars, straight off the flywheel, listed in every path's app-menu screen.
+const MENU_PILLARS = [
+  { key: "hub", label: "Dream App" },
+  { key: "tools", label: "Dream Bank" },
+  { key: "funding", label: "DreamFund" },
+  { key: "spaces", label: "Dream Spaces" },
+  { key: "media", label: "Dream Media" },
+  { key: "portfolio", label: "Portfolio" }
+];
+
 const PATH_SCREENS = {
   media: [
     { kind: "social", caption: "Simon: how I'd start today" },
     { kind: "appicon" },
-    { kind: "menu", items: [{ label: "Home" }, { label: "DreamFund", on: true }, { label: "Dream Spaces", on: true }, { label: "Settings" }] },
-    { kind: "dashboard", label: "Your first month", pct: 62, value: "$6.2k of $10k goal" }
+    { kind: "menu", highlight: "funding" },
+    { kind: "dashboard", label: "Your venture", pct: 62, value: "$6.2k of $10k goal" }
   ],
   paid: [
     { kind: "ad", text: "Start your business today", cta: "Download" },
     { kind: "appicon" },
-    { kind: "menu", items: [{ label: "Home" }, { label: "Dream Bank", on: true }, { label: "DreamFund", on: true }, { label: "Settings" }] },
+    { kind: "menu", highlight: "tools" },
     { kind: "retention", badge: "Active member", text: "Tracked the same way, any entry point" }
   ],
   referral: [
     { kind: "chat", text: "You'd love this", link: "Dream App" },
     { kind: "appicon" },
-    { kind: "menu", items: [{ label: "Home" }, { label: "DreamBrew", on: true }, { label: "Dream Spaces", on: true }, { label: "Portfolio", on: true }] },
+    { kind: "menu", highlight: "portfolio" },
     { kind: "retention", badge: "12 months in", text: "Still part of the ecosystem" }
   ]
 };
@@ -888,8 +899,8 @@ function buildPhoneScreen(s) {
       '<p class="scr-tap-hint">Tap to open</p>');
   }
   if (s.kind === "menu") {
-    return el("div", "scr-menu", s.items.map(it =>
-      '<div class="scr-menu-item' + (it.on ? " is-on" : "") + '">' + esc(it.label) + '</div>'
+    return el("div", "scr-menu", '<p class="scr-menu-title">Menu</p>' + MENU_PILLARS.map(it =>
+      '<div class="scr-menu-item' + (it.key === s.highlight ? " is-on" : "") + '">' + esc(it.label) + '</div>'
     ).join(""));
   }
   if (s.kind === "dashboard") {
