@@ -169,8 +169,10 @@
   .stage-caption { margin-top: 14px; font-size: 13.5px; color: var(--text-secondary); min-height: 20px; }
   .vision-card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; box-shadow: var(--shadow); }
   .vision-card p.vc-heading { font-size: 13px; font-weight: 700; color: var(--accent-dark); text-transform: uppercase; letter-spacing: 0.8px; margin: 0 0 12px; }
-  .vision-card ul { margin: 0; padding-left: 18px; font-size: 13.5px; color: var(--text-secondary); line-height: 1.85; }
-  .vision-card ul li::marker { color: var(--accent); }
+  .vision-card p.vc-intro { font-size: 14.5px; font-weight: 700; color: var(--text-primary); margin: 0 0 18px; }
+  .vision-card .stats-row { display: flex; flex-direction: column; gap: 16px; margin: 0; }
+  .vision-card .stat-num { font-size: 30px; }
+  .vision-card .stat + .stat { padding-top: 16px; border-top: 1px solid var(--border); }
   @media (max-width: 480px) {
     .chip-logo { height: 28px; }
     .chip-logo--hub { height: 42px; }
@@ -180,38 +182,31 @@
   }
 
   /* Org chart */
-  .org-chart { display: flex; flex-direction: column; align-items: center; }
-  .org-node { background: var(--text-primary); color: #fff; font-weight: 700; font-size: 12.5px; padding: 10px 18px; border-radius: 8px; text-align: center; transition: background .35s, color .35s, box-shadow .35s, transform .35s; }
+  .org-standalone { margin-top: 3rem; max-width: 640px; }
+  .org-chart { display: flex; flex-direction: column; align-items: center; margin-top: 1.5rem; }
+  .org-node { background: var(--text-primary); color: #fff; font-weight: 700; font-size: 13px; padding: 12px 22px; border-radius: 10px; text-align: center; box-shadow: var(--shadow); transition: background .35s, color .35s, box-shadow .35s, transform .35s; }
   .org-node.highlight { background: var(--accent); box-shadow: 0 0 0 5px rgba(255,91,0,.18); transform: scale(1.04); }
-  .org-line { width: 1.5px; height: 18px; background: var(--border-strong); }
-  .org-shared-wrap { border: 1px dashed var(--border-strong); border-radius: 14px; padding: 16px; background: rgba(66,45,35,.04); width: 100%; }
-  .org-shared-row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
-  .org-shared-row .org-node { background: rgba(66,45,35,.65); font-size: 11.5px; padding: 8px 14px; }
-  .org-businesses { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; width: 100%; margin-top: 0; }
-  .org-biz-col { display: flex; flex-direction: column; align-items: center; flex: 1; min-width: 120px; }
-  .org-biz { background: var(--accent-soft); color: var(--accent-dark); border: 1.5px solid var(--accent); font-size: 12.5px; }
+  .org-line { width: 1.5px; height: 22px; background: var(--border-strong); }
+  .org-shared-wrap { border: 1px dashed var(--border-strong); border-radius: 16px; padding: 20px; background: var(--surface-1); width: 100%; }
+  .org-shared-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .org-shared-row .org-node { background: rgba(66,45,35,.7); font-size: 12px; padding: 10px 16px; box-shadow: none; }
+  .org-businesses { display: flex; gap: 18px; justify-content: center; flex-wrap: wrap; width: 100%; margin-top: 0; }
+  .org-biz-col { display: flex; flex-direction: column; align-items: center; flex: 1; min-width: 130px; }
+  .org-biz { background: var(--accent-soft); color: var(--accent-dark); border: 1.5px solid var(--accent); font-size: 13px; }
   .org-biz.highlight { background: var(--accent); color: #fff; }
   .org-note { font-size: 9.5px; font-weight: 400; font-style: italic; color: var(--text-muted); margin-top: 4px; max-width: 140px; }
   .org-biz.highlight + .org-note { color: var(--accent-dark); }
-  .org-children { display: flex; flex-direction: column; align-items: center; margin-top: 0; }
-  .org-child { background: var(--surface-1); border: 1px solid var(--border-strong); color: var(--text-primary); font-size: 11px; margin-top: 8px; padding: 7px 12px; }
-  @media (max-width: 480px) { .org-node { font-size: 10.5px; padding: 8px 12px; } .org-shared-row .org-node { font-size: 10px; padding: 6px 10px; } }
+  .org-children { display: flex; flex-direction: column; align-items: center; margin-top: 14px; }
+  .org-child { background: var(--surface-1); border: 1px solid var(--border-strong); color: var(--text-primary); font-size: 11.5px; margin-top: 10px; padding: 9px 14px; box-shadow: var(--shadow); }
+  @media (max-width: 480px) { .org-node { font-size: 11.5px; padding: 10px 14px; } .org-shared-row .org-node { font-size: 10.5px; padding: 8px 12px; } }
 
-  /* Journey */
-  .journey-row { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: start; margin-top: 1.25rem; }
-  @media (max-width: 900px) { .journey-row { grid-template-columns: 1fr; } }
-  .path-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
-  .path-tab { font-family: var(--font-sans); font-weight: 700; font-size: 12.5px; padding: 8px 16px; border-radius: 20px; border: 1px solid var(--border); background: var(--surface-1); color: var(--text-secondary); cursor: pointer; transition: background .3s, color .3s, border-color .3s; }
-  .path-tab.active { background: var(--text-primary); border-color: var(--text-primary); color: #fff; }
-  .path-detail { font-size: 12.5px; color: var(--text-muted); margin: -10px 0 16px; }
-  .step-item { display: flex; gap: 14px; padding: 14px 16px; border: 1px solid var(--border); border-radius: 10px; margin-bottom: 10px; cursor: pointer; background: var(--surface-1); transition: border-color .3s, background .3s; }
-  .step-item.active { border-color: var(--accent); background: var(--accent-soft); }
-  .step-num { flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%; background: var(--text-primary); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; transition: background .3s; }
-  .step-item.active .step-num { background: var(--accent); }
-  .step-title { font-weight: 700; font-size: 14.5px; margin: 0 0 3px; }
-  .step-detail { font-size: 13px; color: var(--text-secondary); margin: 0; line-height: 1.5; }
-  .org-chart-col { position: sticky; top: 90px; }
-  @media (max-width: 900px) { .org-chart-col { position: static; margin-top: 8px; } }
+  /* Journey: static flows */
+  .flows-wrap { margin-top: 1.5rem; }
+  .flow-row { margin-bottom: 26px; }
+  .flow-path-label { font-weight: 700; font-size: 13px; color: var(--accent-dark); text-transform: uppercase; letter-spacing: .5px; margin: 0 0 12px; }
+  .flow-steps { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+  .flow-chip { background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px; padding: 11px 15px; font-size: 12.5px; font-weight: 600; color: var(--text-primary); box-shadow: var(--shadow); max-width: 220px; line-height: 1.4; }
+  .flow-arrow { color: var(--accent); font-size: 18px; font-weight: 700; flex-shrink: 0; }
   .compare-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 32px; }
   @media (max-width: 700px) { .compare-row { grid-template-columns: 1fr; } }
   .compare-card { border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; background: var(--surface-1); }
@@ -220,10 +215,6 @@
   .compare-card .cc-body { font-size: 13.5px; color: var(--text-secondary); margin: 0; line-height: 1.55; }
 
   /* Resource callouts + hub */
-  .resource-callout { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 28px; padding: 16px 20px; border: 1px dashed var(--border-strong); border-radius: 12px; background: var(--surface-1); flex-wrap: wrap; }
-  .resource-callout p { margin: 0; font-size: 13.5px; color: var(--text-secondary); }
-  .resource-callout a { font-weight: 700; color: var(--accent-dark); text-decoration: none; white-space: nowrap; }
-  .resource-callout a:hover { text-decoration: underline; }
   .resources-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px,1fr)); gap: 20px; margin-top: 24px; }
   .resource-card { border: 1px solid var(--border); border-radius: 14px; padding: 20px 22px; background: var(--surface-1); box-shadow: var(--shadow); }
   .resource-card h3 { font-family: var(--font-serif); font-size: 17px; margin: 0 0 6px; }
@@ -239,7 +230,8 @@
   .ask-title { font-weight: 700; font-size: 14.5px; margin: 8px 0 4px; }
   .ask-detail { font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin: 0; }
   .closing-banner { background: var(--text-primary); color: #fff; border-radius: 16px; padding: 28px 30px; margin-top: 32px; box-shadow: var(--shadow); }
-  .closing-banner .cb-quote { font-family: var(--font-serif); font-size: 26px; font-weight: 700; font-style: italic; margin: 0 0 10px; }
+  .closing-banner .cb-quote { font-family: var(--font-serif); font-size: 28px; font-weight: 700; margin: 0 0 10px; }
+  .closing-banner .cb-quote em { color: var(--accent); font-style: italic; }
   .closing-banner .cb-body { font-size: 14px; line-height: 1.6; margin: 0; opacity: .9; }
 
   /* Password gate */
@@ -297,9 +289,10 @@ const RAMPS = {
 
 // Fixed render sizes for each sub-brand logo, chosen so every wordmark sits
 // at a comparable visual height inside its wheel wedge (~48-58px tall).
+// Every wedge logo renders at the same 48px height (Dream App stays larger, by design).
 const LOGO_DIMS = {
-  hub: {w:170, h:70.4}, media: {w:108, h:53.7}, funding: {w:94, h:53.6},
-  tools: {w:122, h:51.4}, portfolio: {w:78, h:52.6}, spaces: {w:100, h:46.1}
+  hub: {w:170, h:70.4}, media: {w:96.6, h:48}, funding: {w:110.6, h:48},
+  tools: {w:152.3, h:48}, portfolio: {w:71.2, h:48}, spaces: {w:104, h:48}
 };
 
 let DATA = null;
@@ -580,17 +573,6 @@ function buildRestructure(container, data) {
   container.appendChild(el("h1", "reveal", r.headline));
   container.appendChild(el("p", "subtitle reveal", r.subtitle));
 
-  const statsRow = el("div", "stats-row reveal");
-  r.stats.forEach((s, i) => {
-    const stat = el("div", "stat");
-    const num = el("div", "stat-num", (s.prefix||"") + "0" + (s.suffix||""));
-    num.dataset.value = s.value; num.dataset.prefix = s.prefix || ""; num.dataset.suffix = s.suffix || "";
-    stat.appendChild(num);
-    stat.appendChild(el("div", "stat-label", esc(s.label)));
-    statsRow.appendChild(stat);
-  });
-  container.appendChild(statsRow);
-
   const row = el("div", "restructure-row reveal");
   container.appendChild(row);
   const stageCol = el("div");
@@ -656,9 +638,17 @@ function buildRestructure(container, data) {
 
   const vc = el("div", "vision-card");
   vc.appendChild(el("p", "vc-heading", "The vision"));
-  const ul = el("ul");
-  r.vision.forEach(v => ul.appendChild(el("li", null, esc(v))));
-  vc.appendChild(ul);
+  vc.appendChild(el("p", "vc-intro", esc(r.visionIntro)));
+  const statsWrap = el("div", "stats-row");
+  r.stats.forEach(s => {
+    const stat = el("div", "stat");
+    const num = el("div", "stat-num", (s.prefix||"") + "0" + (s.suffix||""));
+    num.dataset.value = s.value; num.dataset.prefix = s.prefix || ""; num.dataset.suffix = s.suffix || "";
+    stat.appendChild(num);
+    stat.appendChild(el("div", "stat-label", esc(s.label)));
+    statsWrap.appendChild(stat);
+  });
+  vc.appendChild(statsWrap);
   visionCol.appendChild(vc);
 
   let restructured = false;
@@ -780,48 +770,22 @@ function buildJourney(container, data) {
   container.appendChild(el("h1", "reveal", j.headline));
   container.appendChild(el("p", "subtitle reveal", j.subtitle));
 
-  const row = el("div", "journey-row reveal");
-  container.appendChild(row);
-  const stepsCol = el("div");
-  const orgCol = el("div", "org-chart-col");
-  row.appendChild(stepsCol);
-  row.appendChild(orgCol);
-
-  const highlight = buildOrgChart(orgCol, data);
-
-  const tabs = el("div", "path-tabs");
-  stepsCol.appendChild(tabs);
-  const pathDetail = el("p", "path-detail", "");
-  stepsCol.appendChild(pathDetail);
-  const stepsList = el("div");
-  stepsCol.appendChild(stepsList);
-
-  let activePath = 0, activeStep = 0;
-  function renderPath() {
-    const path = j.paths[activePath];
-    tabs.innerHTML = "";
-    j.paths.forEach((p, i) => {
-      const btn = el("button", "path-tab" + (i === activePath ? " active" : ""), esc(p.label));
-      btn.addEventListener("click", () => { activePath = i; activeStep = 0; renderPath(); });
-      tabs.appendChild(btn);
-    });
-    pathDetail.textContent = path.detail;
-    stepsList.innerHTML = "";
+  const flowsWrap = el("div", "flows-wrap reveal");
+  j.paths.forEach(path => {
+    const rowEl = el("div", "flow-row");
+    rowEl.appendChild(el("p", "flow-path-label", esc(path.label) + " &middot; " + esc(path.detail)));
+    const steps = el("div", "flow-steps");
     path.steps.forEach((s, i) => {
-      const item = el("div", "step-item" + (i === activeStep ? " active" : ""));
-      const num = el("div", "step-num", String(i+1));
-      const body = el("div");
-      body.appendChild(el("p", "step-title", esc(s.label)));
-      body.appendChild(el("p", "step-detail", esc(s.detail)));
-      item.appendChild(num); item.appendChild(body);
-      item.addEventListener("click", () => { activeStep = i; renderPath(); });
-      stepsList.appendChild(item);
+      if (i > 0) steps.appendChild(el("span", "flow-arrow", "&rarr;"));
+      const chip = el("div", "flow-chip", esc(s.label));
+      steps.appendChild(chip);
     });
-    highlight(path.steps[activeStep].org);
-  }
-  renderPath();
+    rowEl.appendChild(steps);
+    flowsWrap.appendChild(rowEl);
+  });
+  container.appendChild(flowsWrap);
 
-  const compareRow = el("div", "compare-row");
+  const compareRow = el("div", "compare-row reveal");
   const nowCard = el("div", "compare-card");
   nowCard.appendChild(el("p", "cc-label", j.compare.now.label));
   nowCard.appendChild(el("p", "cc-body", esc(j.compare.now.body)));
@@ -829,10 +793,18 @@ function buildJourney(container, data) {
   futureCard.appendChild(el("p", "cc-label", j.compare.future.label));
   futureCard.appendChild(el("p", "cc-body", esc(j.compare.future.body)));
   compareRow.appendChild(nowCard); compareRow.appendChild(futureCard);
-  const compareHeading = el("p", null, esc(j.compare.heading));
+  const compareHeading = el("p", "reveal", esc(j.compare.heading));
   compareHeading.style.cssText = "font-weight:700;font-size:15px;margin:0;";
   container.appendChild(compareHeading);
   container.appendChild(compareRow);
+
+  const orgWrap = el("div", "org-standalone reveal");
+  const oc = data.orgChart;
+  orgWrap.appendChild(el("p", "eyebrow", oc.eyebrow));
+  orgWrap.appendChild(el("h1", null, oc.headline));
+  orgWrap.appendChild(el("p", "subtitle", oc.subtitle));
+  buildOrgChart(orgWrap, data, "org-chart--static");
+  container.appendChild(orgWrap);
 }
 
 /* ---------- Conclusion ---------- */
@@ -845,29 +817,17 @@ function buildConclusion(container, data) {
     const card = el("div", "ask-card");
     card.appendChild(el("div", "ask-num", a.n));
     card.appendChild(el("p", "ask-title", esc(a.title)));
-    card.appendChild(el("p", "ask-detail", esc(a.detail)));
+    if (a.detail) card.appendChild(el("p", "ask-detail", esc(a.detail)));
     grid.appendChild(card);
   });
   container.appendChild(grid);
   const closing = el("div", "closing-banner reveal");
-  closing.appendChild(el("p", "cb-quote", esc(c.closing.headline)));
+  closing.appendChild(el("p", "cb-quote", c.closing.headline));
   closing.appendChild(el("p", "cb-body", esc(c.closing.body)));
   container.appendChild(closing);
 }
 
 /* ---------- Resources ---------- */
-function resourceCallout(container, item, promptText) {
-  const co = el("div", "resource-callout reveal");
-  co.appendChild(el("p", null, esc(promptText)));
-  if (item.url && item.url !== "#") {
-    const a = el("a", null, item.title + " &rarr;"); a.href = item.url; a.target = "_blank"; a.rel = "noopener";
-    co.appendChild(a);
-  } else {
-    co.appendChild(el("span", null, item.title + " (link coming soon)"));
-  }
-  container.appendChild(co);
-}
-
 function buildResources(container, data) {
   const r = data.resources;
   container.appendChild(el("p", "eyebrow reveal", r.eyebrow));
@@ -914,7 +874,6 @@ function render(data) {
   app.appendChild(journeySection);
   const journeyInner = el("div", "wrap"); journeySection.appendChild(journeyInner);
   buildJourney(journeyInner, data);
-  resourceCallout(journeyInner, data.resources.items.find(i => i.tag === "playbook"), "Want the day-to-day detail on how we work?");
 
   const roadmapSection = el("section", "section reveal"); roadmapSection.id = "roadmap";
   app.appendChild(roadmapSection);
@@ -930,8 +889,6 @@ function render(data) {
   app.appendChild(conclusionSection);
   const conclusionInner = el("div", "wrap"); conclusionSection.appendChild(conclusionInner);
   buildConclusion(conclusionInner, data);
-  resourceCallout(conclusionInner, data.resources.items.find(i => i.tag === "guide"), "Want the fuller detail on structure and roles?");
-  resourceCallout(conclusionInner, data.resources.items.find(i => i.tag === "feedback"), "Still unclear on something about the restructure?");
 
   const resourcesSection = el("section", "section reveal"); resourcesSection.id = "resources";
   app.appendChild(resourcesSection);
@@ -1043,7 +1000,7 @@ function initCursor() {
     if (!shown) { dot.classList.add("active"); shown = true; }
     dot.style.left = e.clientX + "px";
     dot.style.top = e.clientY + "px";
-    const target = e.target.closest("button, a, .chip, .step-item, .path-tab");
+    const target = e.target.closest("button, a, .chip, .flow-chip");
     dot.classList.toggle("hover", !!target);
   }, { passive: true });
   window.addEventListener("mouseleave", () => dot.classList.remove("active"));
