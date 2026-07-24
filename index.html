@@ -146,7 +146,7 @@
   /* Restructure section */
   .restructure-row { display: grid; grid-template-columns: minmax(380px, 620px) 1fr; gap: 32px; align-items: start; margin-top: 1.1rem; }
   @media (max-width: 900px) { .restructure-row { grid-template-columns: 1fr; } }
-  .stage { position: relative; width: 100%; aspect-ratio: 680 / 630; }
+  .stage { position: relative; width: 100%; aspect-ratio: 680 / 680; }
   .stage svg.stage-wheel { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; transition: opacity 1.1s ease; }
   .stage.restructured svg.stage-wheel { opacity: 1; }
   .chip-pos { position: absolute; transform: translate(-50%, -50%); transition: left 1.3s var(--ease), top 1.3s var(--ease); }
@@ -297,11 +297,20 @@ const svgns = "http://www.w3.org/2000/svg";
 const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 const WEDGES = [
-  {key:'portfolio', d:'M254.4,322.2 L92.7,269.7 A260,260 0 0,1 340,90 L340,260 A90,90 0 0,0 254.4,322.2 Z', lx:237, ly:208},
-  {key:'tools',     d:'M340,260 L340,90 A260,260 0 0,1 587.3,269.7 L425.6,322.2 A90,90 0 0,0 340,260 Z',   lx:443, ly:208},
-  {key:'media',     d:'M425.6,322.2 L587.3,269.7 A260,260 0 0,1 492.9,560.3 L392.9,422.8 A90,90 0 0,0 425.6,322.2 Z', lx:506, ly:404},
-  {key:'funding',   d:'M392.9,422.8 L492.9,560.3 A260,260 0 0,1 187.1,560.3 L287.1,422.8 A90,90 0 0,0 392.9,422.8 Z', lx:340, ly:525},
-  {key:'spaces',    d:'M287.1,422.8 L187.1,560.3 A260,260 0 0,1 92.7,269.7 L254.4,322.2 A90,90 0 0,0 287.1,422.8 Z',  lx:174, ly:404}
+  {key:'tools',     d:'M340,55 A285,285 0 0,1 625,340 L525,340 A185,185 0 0,0 340,155 Z', lx:506.17, ly:173.83},
+  {key:'media',     d:'M625,340 A285,285 0 0,1 340,625 L340,525 A185,185 0 0,0 525,340 Z', lx:506.17, ly:506.17},
+  {key:'funding',   d:'M340,625 A285,285 0 0,1 55,340 L155,340 A185,185 0 0,0 340,525 Z', lx:173.83, ly:506.17},
+  {key:'portfolio', d:'M55,340 A285,285 0 0,1 340,55 L340,155 A185,185 0 0,0 155,340 Z', lx:173.83, ly:173.83}
+];
+
+// The gap ring between the hub and the four pillars: Physical Spaces isn't
+// its own pillar, so instead of one wedge it fills all four quarters of the
+// gap equally, signalling "not yet consolidated, could sit under any of them".
+const SPACES_WEDGES = [
+  {d:'M340,155 A185,185 0 0,1 525,340 L480,340 A140,140 0 0,0 340,200 Z', lx:454.9, ly:225.1},
+  {d:'M525,340 A185,185 0 0,1 340,525 L340,480 A140,140 0 0,0 480,340 Z', lx:454.9, ly:454.9},
+  {d:'M340,525 A185,185 0 0,1 155,340 L200,340 A140,140 0 0,0 340,480 Z', lx:225.1, ly:454.9},
+  {d:'M155,340 A185,185 0 0,1 340,155 L340,200 A140,140 0 0,0 200,340 Z', lx:225.1, ly:225.1}
 ];
 
 // Ramps from Dream's official secondary palette (Brand Guidelines, July 2026).
@@ -313,13 +322,19 @@ const RAMPS = {
   fund:      {fill:'#F7E1E9', stroke:'#C80045', title:'#A30039', sub:'#C80045'}
 };
 
-// Fixed render sizes for each sub-brand logo, chosen so every wordmark sits
-// at a comparable visual height inside its wheel wedge (~48-58px tall).
-// Every wedge logo renders at the same 48px height (Dream App stays larger, by design).
-const LOGO_DIMS = {
-  hub: {w:170, h:70.4}, media: {w:96.6, h:48}, funding: {w:110.6, h:48},
-  tools: {w:152.3, h:48}, portfolio: {w:71.2, h:48}, spaces: {w:104, h:48}
+// Native aspect ratios (w/h) of each logo file, used to fit every pillar logo
+// into the same bounding box so no logo reads visually bigger than another.
+// Dream App gets its own, larger box -- it's the one thing meant to dominate.
+const LOGO_ASPECT = {
+  hub: 1121/464, tools: 1199/378, media: 1223/608, funding: 1092/483, portfolio: 975/657
 };
+const PILLAR_BOX = {w: 112, h: 54};
+const HUB_BOX = {w: 192, h: 90};
+function fitBox(aspect, box) {
+  let w = box.h * aspect, h = box.h;
+  if (w > box.w) { w = box.w; h = box.w / aspect; }
+  return {w, h};
+}
 
 let DATA = null;
 
@@ -330,6 +345,169 @@ function makeChipContent(label, logoFile, big) {
     return img;
   }
   return el("span", "chip-wordmark", esc(label));
+}
+
+// Renders the full wheel (Physical Spaces ring, hub, four pillars) into an
+// existing <svg>. Used identically by the roadmap wheel (mode "interactive",
+// which needs id'd overlay paths for the phase-progress fill) and the
+// restructure preview (mode "static", always shown fully realized) -- one
+// function so the two can never drift apart again.
+function renderWheelSVG(svgEl, data, mode) {
+  const interactive = mode === "interactive";
+
+  if (interactive) {
+    const defs = document.createElementNS(svgns, "defs");
+    const pattern = document.createElementNS(svgns, "pattern");
+    pattern.setAttribute("id","hatch-accent"); pattern.setAttribute("width","7"); pattern.setAttribute("height","7");
+    pattern.setAttribute("patternUnits","userSpaceOnUse"); pattern.setAttribute("patternTransform","rotate(45)");
+    const hatchBg = document.createElementNS(svgns, "rect");
+    hatchBg.setAttribute("width","7"); hatchBg.setAttribute("height","7"); hatchBg.setAttribute("fill","#E3EEFC");
+    const hatchLine = document.createElementNS(svgns, "line");
+    hatchLine.setAttribute("x1","0"); hatchLine.setAttribute("y1","0"); hatchLine.setAttribute("x2","0"); hatchLine.setAttribute("y2","7");
+    hatchLine.setAttribute("stroke","#1773E0"); hatchLine.setAttribute("stroke-width","3");
+    pattern.appendChild(hatchBg); pattern.appendChild(hatchLine);
+    defs.appendChild(pattern);
+    svgEl.appendChild(defs);
+  }
+
+  // pillar wedges
+  WEDGES.forEach(w => {
+    if (interactive) {
+      const base = document.createElementNS(svgns,"path");
+      base.setAttribute("d", w.d); base.setAttribute("fill","var(--wheel-dormant-fill)"); base.setAttribute("stroke","var(--wheel-dormant-stroke)"); base.setAttribute("stroke-width","0.5");
+      svgEl.appendChild(base);
+    } else {
+      const p = document.createElementNS(svgns,"path");
+      const ramp = RAMPS[data.divisions[w.key].style];
+      p.setAttribute("d", w.d); p.setAttribute("fill", ramp.fill); p.setAttribute("stroke", ramp.stroke); p.setAttribute("stroke-width","1");
+      svgEl.appendChild(p);
+    }
+  });
+  if (interactive) {
+    WEDGES.forEach(w => {
+      const ov = document.createElementNS(svgns,"path");
+      ov.setAttribute("id","ov-"+w.key); ov.setAttribute("d", w.d); ov.setAttribute("fill","none"); ov.setAttribute("stroke","none"); ov.setAttribute("stroke-width","1");
+      ov.style.cssText = "opacity:0;transition:opacity .4s";
+      svgEl.appendChild(ov);
+    });
+  }
+
+  // Physical Spaces gap ring: static in both modes, never phase-driven
+  SPACES_WEDGES.forEach(w => {
+    const seg = document.createElementNS(svgns,"path");
+    seg.setAttribute("d", w.d); seg.setAttribute("fill","var(--wheel-dormant-fill)"); seg.setAttribute("stroke","var(--wheel-dormant-stroke)"); seg.setAttribute("stroke-width","0.5");
+    svgEl.appendChild(seg);
+    [["Physical", w.ly-5], ["Spaces", w.ly+9]].forEach(([txt,y]) => {
+      const t = document.createElementNS(svgns,"text");
+      t.setAttribute("x", w.lx); t.setAttribute("y", y);
+      t.setAttribute("text-anchor","middle"); t.setAttribute("dominant-baseline","central");
+      t.style.cssText = "font-size:10px;font-weight:700;font-family:var(--font-sans);fill:var(--text-muted)";
+      t.textContent = txt;
+      svgEl.appendChild(t);
+    });
+  });
+
+  // hub circle
+  const hubBase = document.createElementNS(svgns,"circle");
+  hubBase.setAttribute("cx","340"); hubBase.setAttribute("cy","340"); hubBase.setAttribute("r","140");
+  hubBase.setAttribute("fill", interactive ? "var(--wheel-dormant-fill)" : RAMPS.accent.fill);
+  hubBase.setAttribute("stroke", interactive ? "var(--wheel-dormant-stroke)" : RAMPS.accent.stroke);
+  hubBase.setAttribute("stroke-width", interactive ? "0.5" : "1");
+  svgEl.appendChild(hubBase);
+  if (interactive) {
+    const hubOv = document.createElementNS(svgns,"circle");
+    hubOv.setAttribute("id","ov-hub"); hubOv.setAttribute("cx","340"); hubOv.setAttribute("cy","340"); hubOv.setAttribute("r","140");
+    hubOv.setAttribute("fill","none"); hubOv.setAttribute("stroke","none");
+    hubOv.style.cssText = "opacity:0;transition:opacity .4s";
+    svgEl.appendChild(hubOv);
+  }
+
+  // top half of the hub: Dream App, large and the clear visual anchor
+  const hd = fitBox(LOGO_ASPECT.hub, HUB_BOX);
+  const hubImg = document.createElementNS(svgns,"image");
+  hubImg.setAttribute("href","logos/"+data.hub.logo); hubImg.setAttributeNS("http://www.w3.org/1999/xlink","href","logos/"+data.hub.logo);
+  hubImg.setAttribute("x", 340-hd.w/2); hubImg.setAttribute("y", 215-hd.h/2+39);
+  hubImg.setAttribute("width", hd.w); hubImg.setAttribute("height", hd.h);
+  if (interactive) hubImg.setAttribute("id","hub-title");
+  svgEl.appendChild(hubImg);
+  const hubAppTag = document.createElementNS(svgns,"text");
+  hubAppTag.setAttribute("x","340"); hubAppTag.setAttribute("y", 254+hd.h/2+18);
+  hubAppTag.setAttribute("text-anchor","middle"); hubAppTag.setAttribute("dominant-baseline","central");
+  hubAppTag.style.cssText = "font-size:16px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;font-family:var(--font-sans);fill:var(--accent-dark)";
+  hubAppTag.textContent = "App";
+  svgEl.appendChild(hubAppTag);
+  const hubSub = document.createElementNS(svgns,"text");
+  if (interactive) hubSub.setAttribute("id","hub-sub");
+  hubSub.setAttribute("x","340"); hubSub.setAttribute("y", 254+hd.h/2+34);
+  hubSub.setAttribute("text-anchor","middle"); hubSub.setAttribute("dominant-baseline","central");
+  hubSub.style.cssText = "font-size:10px;font-family:var(--font-sans);fill:var(--text-secondary)";
+  hubSub.textContent = data.hub.subBefore;
+  svgEl.appendChild(hubSub);
+
+  // divider between the App half and the resources half
+  const hubDivider = document.createElementNS(svgns,"line");
+  hubDivider.setAttribute("x1","200"); hubDivider.setAttribute("y1","340"); hubDivider.setAttribute("x2","480"); hubDivider.setAttribute("y2","340");
+  hubDivider.setAttribute("stroke","rgba(66,45,35,.24)"); hubDivider.setAttribute("stroke-width","1.2");
+  svgEl.appendChild(hubDivider);
+  const colDivider = document.createElementNS(svgns,"line");
+  colDivider.setAttribute("x1","340"); colDivider.setAttribute("y1","350"); colDivider.setAttribute("x2","340"); colDivider.setAttribute("y2","422");
+  colDivider.setAttribute("stroke","rgba(66,45,35,.18)"); colDivider.setAttribute("stroke-width","1");
+  svgEl.appendChild(colDivider);
+
+  // bottom half, left column: Internal Resources (reuses the org chart's shared-resources list)
+  const colTitle = (x, label) => {
+    const t = document.createElementNS(svgns,"text");
+    t.setAttribute("x", x); t.setAttribute("y", "358");
+    t.setAttribute("text-anchor","middle"); t.setAttribute("dominant-baseline","central");
+    t.style.cssText = "font-size:9px;font-weight:700;letter-spacing:.3px;text-transform:uppercase;font-family:var(--font-sans);fill:var(--text-primary)";
+    t.textContent = label;
+    svgEl.appendChild(t);
+  };
+  colTitle(260, "Internal Resources");
+  data.orgChart.shared.forEach((item, i) => {
+    const t = document.createElementNS(svgns,"text");
+    t.setAttribute("x","260"); t.setAttribute("y", 376 + i*12);
+    t.setAttribute("text-anchor","middle"); t.setAttribute("dominant-baseline","central");
+    t.style.cssText = "font-size:9.5px;font-family:var(--font-sans);fill:var(--text-secondary)";
+    t.textContent = item;
+    svgEl.appendChild(t);
+  });
+
+  // bottom half, right column: Partnerships Engine, with Dream Ventures underneath
+  colTitle(420, "Partnerships Engine");
+  const venturesTitle = document.createElementNS(svgns,"text");
+  venturesTitle.setAttribute("x","420"); venturesTitle.setAttribute("y","382");
+  venturesTitle.setAttribute("text-anchor","middle"); venturesTitle.setAttribute("dominant-baseline","central");
+  venturesTitle.style.cssText = "font-size:11px;font-weight:700;font-style:italic;font-family:var(--font-serif);fill:var(--text-primary)";
+  venturesTitle.textContent = "Dream Ventures";
+  svgEl.appendChild(venturesTitle);
+  const venturesSub = document.createElementNS(svgns,"text");
+  venturesSub.setAttribute("x","420"); venturesSub.setAttribute("y","396");
+  venturesSub.setAttribute("text-anchor","middle"); venturesSub.setAttribute("dominant-baseline","central");
+  venturesSub.style.cssText = "font-size:8.5px;font-family:var(--font-sans);fill:var(--text-secondary)";
+  venturesSub.textContent = "invests in outside startups";
+  svgEl.appendChild(venturesSub);
+
+  // the four pillar logos, every one fit into the same box so none dominates
+  WEDGES.forEach(w => {
+    const div = data.divisions[w.key];
+    const dims = fitBox(LOGO_ASPECT[w.key], PILLAR_BOX);
+    const hasSub = !!div.sub;
+    const logoCenterY = hasSub ? w.ly - 14 : w.ly;
+    const img = document.createElementNS(svgns,"image");
+    img.setAttribute("href","logos/"+div.logo); img.setAttributeNS("http://www.w3.org/1999/xlink","href","logos/"+div.logo);
+    img.setAttribute("x", w.lx - dims.w/2); img.setAttribute("y", logoCenterY - dims.h/2);
+    img.setAttribute("width", dims.w); img.setAttribute("height", dims.h);
+    if (interactive) img.setAttribute("id", w.key+"-title");
+    svgEl.appendChild(img);
+    const sub = document.createElementNS(svgns,"text");
+    if (interactive) sub.setAttribute("id", w.key+"-sub");
+    sub.setAttribute("x", w.lx); sub.setAttribute("y", logoCenterY + dims.h/2 + 14);
+    sub.setAttribute("text-anchor","middle"); sub.setAttribute("dominant-baseline","central");
+    sub.style.cssText = "font-size:12px;font-family:var(--font-sans);fill:var(--text-secondary)";
+    sub.textContent = div.sub || "";
+    svgEl.appendChild(sub);
+  });
 }
 
 function buildWheel(container, data) {
@@ -392,91 +570,9 @@ function buildWheel(container, data) {
   wheelShell.id = "wheelCol";
   wheelRow.appendChild(wheelShell);
   const wheelSvg = document.createElementNS(svgns, "svg");
-  wheelSvg.setAttribute("width","100%"); wheelSvg.setAttribute("viewBox","0 0 680 630");
+  wheelSvg.setAttribute("width","100%"); wheelSvg.setAttribute("viewBox","0 0 680 680");
 
-  const defs = document.createElementNS(svgns, "defs");
-  const pattern = document.createElementNS(svgns, "pattern");
-  pattern.setAttribute("id","hatch-accent"); pattern.setAttribute("width","7"); pattern.setAttribute("height","7");
-  pattern.setAttribute("patternUnits","userSpaceOnUse"); pattern.setAttribute("patternTransform","rotate(45)");
-  const hatchBg = document.createElementNS(svgns, "rect");
-  hatchBg.setAttribute("width","7"); hatchBg.setAttribute("height","7"); hatchBg.setAttribute("fill","#E3EEFC");
-  const hatchLine = document.createElementNS(svgns, "line");
-  hatchLine.setAttribute("x1","0"); hatchLine.setAttribute("y1","0"); hatchLine.setAttribute("x2","0"); hatchLine.setAttribute("y2","7");
-  hatchLine.setAttribute("stroke","#1773E0"); hatchLine.setAttribute("stroke-width","3");
-  pattern.appendChild(hatchBg); pattern.appendChild(hatchLine);
-  defs.appendChild(pattern);
-  wheelSvg.appendChild(defs);
-
-  WEDGES.forEach(w => {
-    const base = document.createElementNS(svgns,"path");
-    base.setAttribute("d", w.d); base.setAttribute("fill","var(--wheel-dormant-fill)"); base.setAttribute("stroke","var(--wheel-dormant-stroke)"); base.setAttribute("stroke-width","0.5");
-    wheelSvg.appendChild(base);
-  });
-  WEDGES.forEach(w => {
-    const ov = document.createElementNS(svgns,"path");
-    ov.setAttribute("id","ov-"+w.key); ov.setAttribute("d", w.d); ov.setAttribute("fill","none"); ov.setAttribute("stroke","none"); ov.setAttribute("stroke-width","1");
-    ov.style.cssText = "opacity:0;transition:opacity .4s";
-    wheelSvg.appendChild(ov);
-  });
-
-  const hubBase = document.createElementNS(svgns,"circle");
-  hubBase.setAttribute("cx","340"); hubBase.setAttribute("cy","350"); hubBase.setAttribute("r","90");
-  hubBase.setAttribute("fill","var(--wheel-dormant-fill)"); hubBase.setAttribute("stroke","var(--wheel-dormant-stroke)"); hubBase.setAttribute("stroke-width","0.5");
-  wheelSvg.appendChild(hubBase);
-  const hubOv = document.createElementNS(svgns,"circle");
-  hubOv.setAttribute("id","ov-hub"); hubOv.setAttribute("cx","340"); hubOv.setAttribute("cy","350"); hubOv.setAttribute("r","90");
-  hubOv.setAttribute("fill","none"); hubOv.setAttribute("stroke","none");
-  hubOv.style.cssText = "opacity:0;transition:opacity .4s";
-  wheelSvg.appendChild(hubOv);
-
-  const hd = LOGO_DIMS.hub;
-  const hubImgCenterY = 322;
-  const hubImg = document.createElementNS(svgns,"image");
-  hubImg.setAttribute("href","logos/"+data.hub.logo); hubImg.setAttributeNS("http://www.w3.org/1999/xlink","href","logos/"+data.hub.logo);
-  hubImg.setAttribute("x", 340-hd.w/2); hubImg.setAttribute("y", hubImgCenterY-hd.h/2);
-  hubImg.setAttribute("width", hd.w); hubImg.setAttribute("height", hd.h);
-  hubImg.setAttribute("id","hub-title");
-  wheelSvg.appendChild(hubImg);
-  const hubAppTag = document.createElementNS(svgns,"text");
-  hubAppTag.setAttribute("x","340"); hubAppTag.setAttribute("y", hubImgCenterY + hd.h/2 + 14);
-  hubAppTag.setAttribute("text-anchor","middle"); hubAppTag.setAttribute("dominant-baseline","central");
-  hubAppTag.style.cssText = "font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;font-family:var(--font-sans);fill:var(--accent-dark)";
-  hubAppTag.textContent = "App";
-  wheelSvg.appendChild(hubAppTag);
-  const hubSub = document.createElementNS(svgns,"text");
-  hubSub.setAttribute("id","hub-sub"); hubSub.setAttribute("x","340"); hubSub.setAttribute("y", hubImgCenterY + hd.h/2 + 30);
-  hubSub.setAttribute("text-anchor","middle"); hubSub.setAttribute("dominant-baseline","central");
-  hubSub.style.cssText = "font-size:12px;font-family:var(--font-sans);fill:var(--text-secondary)";
-  hubSub.textContent = data.hub.subBefore;
-  wheelSvg.appendChild(hubSub);
-
-  WEDGES.forEach(w => {
-    const div = data.divisions[w.key];
-    const hasSub = !!div.sub;
-    const logoCenterY = hasSub ? w.ly - 20 : w.ly - 8;
-    if (div.logo) {
-      const dims = LOGO_DIMS[w.key];
-      const img = document.createElementNS(svgns,"image");
-      img.setAttribute("href","logos/"+div.logo); img.setAttributeNS("http://www.w3.org/1999/xlink","href","logos/"+div.logo);
-      img.setAttribute("x", w.lx - dims.w/2); img.setAttribute("y", logoCenterY - dims.h/2);
-      img.setAttribute("width", dims.w); img.setAttribute("height", dims.h);
-      img.setAttribute("id", w.key+"-title");
-      wheelSvg.appendChild(img);
-    } else {
-      const title = document.createElementNS(svgns,"text");
-      title.setAttribute("id", w.key+"-title"); title.setAttribute("x", w.lx); title.setAttribute("y", logoCenterY);
-      title.setAttribute("text-anchor","middle"); title.setAttribute("dominant-baseline","central");
-      title.style.cssText = "font-size:17px;font-weight:700;font-style:italic;font-family:var(--font-serif);fill:var(--text-secondary)";
-      title.textContent = div.label;
-      wheelSvg.appendChild(title);
-    }
-    const sub = document.createElementNS(svgns,"text");
-    sub.setAttribute("id", w.key+"-sub"); sub.setAttribute("x", w.lx); sub.setAttribute("y", w.ly+11);
-    sub.setAttribute("text-anchor","middle"); sub.setAttribute("dominant-baseline","central");
-    sub.style.cssText = "font-size:12px;font-family:var(--font-sans);fill:var(--text-secondary)";
-    sub.textContent = div.sub || "";
-    wheelSvg.appendChild(sub);
-  });
+  renderWheelSVG(wheelSvg, data, "interactive");
 
   wheelShell.appendChild(wheelSvg);
 
@@ -533,6 +629,7 @@ function buildWheel(container, data) {
     const p = data.phases[phase-1];
     phaseLabel.textContent = "Phase " + phase + " (" + p.range + ")";
     Object.keys(data.divisions).forEach(key => {
+      if (key === "spaces") return; // Physical Spaces is now a static gap ring, not phase-driven
       const div = data.divisions[key];
       let state = "dormant";
       if (phase >= div.threshold) state = "complete";
@@ -610,25 +707,15 @@ function buildRestructure(container, data) {
   stageCol.appendChild(stage);
 
   const svg = document.createElementNS(svgns, "svg");
-  svg.setAttribute("class", "stage-wheel"); svg.setAttribute("viewBox", "0 0 680 630");
-  WEDGES.forEach(w => {
-    const p = document.createElementNS(svgns, "path");
-    p.setAttribute("d", w.d);
-    const ramp = RAMPS[data.divisions[w.key].style];
-    p.setAttribute("fill", ramp.fill); p.setAttribute("stroke", ramp.stroke); p.setAttribute("stroke-width", "1");
-    svg.appendChild(p);
-  });
-  const hubShape = document.createElementNS(svgns, "circle");
-  hubShape.setAttribute("cx", "340"); hubShape.setAttribute("cy", "350"); hubShape.setAttribute("r", "90");
-  hubShape.setAttribute("fill", RAMPS.accent.fill); hubShape.setAttribute("stroke", RAMPS.accent.stroke); hubShape.setAttribute("stroke-width", "1");
-  svg.appendChild(hubShape);
+  svg.setAttribute("class", "stage-wheel"); svg.setAttribute("viewBox", "0 0 680 680");
+  renderWheelSVG(svg, data, "static");
   stage.appendChild(svg);
 
   const chipEls = {};
   r.scattered.forEach(item => {
     const pos = el("div", "chip-pos");
     pos.style.left = (item.x / 680 * 100) + "%";
-    pos.style.top = (item.y / 630 * 100) + "%";
+    pos.style.top = (item.y / 680 * 100) + "%";
     const chip = el("div", "chip");
     chip.style.setProperty("--rot", item.rot + "deg");
     const content = makeChipContent(item.label, item.logo, item.key === "hub");
@@ -640,7 +727,7 @@ function buildRestructure(container, data) {
     chipEls[item.key] = { pos, chip, content };
   });
 
-  const targets = { hub: { x: 340, y: 350 } };
+  const targets = { hub: { x: 340, y: 340 } };
   WEDGES.forEach(w => { targets[w.key] = { x: w.lx, y: w.ly }; });
 
   const newChipEls = {};
@@ -648,7 +735,7 @@ function buildRestructure(container, data) {
     const t = targets[key];
     const pos = el("div", "new-chip-pos");
     pos.style.left = (t.x / 680 * 100) + "%";
-    pos.style.top = (t.y / 630 * 100) + "%";
+    pos.style.top = (t.y / 680 * 100) + "%";
     const chip = el("div", "chip");
     chip.appendChild(makeChipContent(data.divisions[key].label, data.divisions[key].logo));
     const badge = el("div", "new-badge", "NEW");
@@ -684,7 +771,7 @@ function buildRestructure(container, data) {
       const { pos, content } = chipEls[item.key];
       const t = on ? targets[item.key] : { x: item.x, y: item.y };
       pos.style.left = (t.x / 680 * 100) + "%";
-      pos.style.top = (t.y / 630 * 100) + "%";
+      pos.style.top = (t.y / 680 * 100) + "%";
       if (item.key === "hub" && content.tagName === "IMG") {
         content.src = on ? "logos/" + data.hub.logo : "logos/" + item.logo;
         content.alt = on ? data.hub.label : item.label;
@@ -845,7 +932,6 @@ function buildOrgChart(container, data) {
 const MENU_PILLARS = [
   { key: "tools", label: "Dream Bank" },
   { key: "funding", label: "DreamFund" },
-  { key: "spaces", label: "Dream Spaces" },
   { key: "media", label: "Dream Media" },
   { key: "portfolio", label: "Portfolio" }
 ];
