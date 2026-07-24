@@ -6,26 +6,27 @@
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="default" />
 <meta name="apple-mobile-web-app-title" content="Dream" />
-<meta name="theme-color" content="#F4ECE0" />
+<meta name="theme-color" content="#FFFFFF" />
 <link rel="manifest" href="manifest.json" />
 <link rel="apple-touch-icon" href="icon-192.png" />
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;1,9..144,600;1,9..144,700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
 <title>Dream: Restructure &amp; Roadmap</title>
 <style>
   /*
-    Brand tokens from Dream Brand Guidelines, July 2026, with the beige surface
-    Vitaliia asked to match from dream-design-language.vercel.app.
-    Primary: Vivid Orange #ff5b00, Burnt Coffee #422d23.
-    Secondary (used sparingly, precedence order): Electric Mint, Sky Blue, Pomegranate.
-    Richmond Display isn't available as a web font; Fraunces stands in for it.
+    Brand tokens from Dream Brand Guidelines, July 2026.
+    Primary palette: Vivid Orange #ff5b00, Burnt Coffee #422d23, Grey #f4f4f4, White #ffffff.
+    Backgrounds use Grey and White only (primary palette) -- never a secondary colour, per guidelines section 2.3.
+    Secondary palette (used sparingly, precedence order): Electric Mint #0dc499, Sky Blue #1773e0,
+    Pomegranate #c80045, Fuel Yellow #f9c770, Dark Teal #176161, Iceberg Blue #8bb9c6.
+    This page is "for internal use only" (a deck/presentation), so per section 3.3 it uses the
+    secondary font pairing -- Georgia (headings) + Calibri (body) -- not the core Richmond
+    Display / Source Sans Variable pairing, which is reserved for external, professionally-printed
+    materials.
     Type is left-aligned throughout, per the guidelines.
   */
   :root {
-    --bg: #F4ECE0;
-    --surface-1: #FBF7F0;
-    --surface-2: #EEE2CC;
+    --bg: #FFFFFF;
+    --surface-1: #FFFFFF;
+    --surface-2: #F4F4F4;
     --border: rgba(66,45,35,.14);
     --border-strong: rgba(66,45,35,.30);
     --text-primary: #422D23;
@@ -34,10 +35,10 @@
     --accent: #FF5B00;
     --accent-soft: #FFE3CC;
     --accent-dark: #E14E00;
-    --wheel-dormant-fill: #EFE6D6;
-    --wheel-dormant-stroke: rgba(66,45,35,.26);
-    --font-serif: "Fraunces", Georgia, "Times New Roman", serif;
-    --font-sans: "Source Sans 3", Calibri, system-ui, -apple-system, sans-serif;
+    --wheel-dormant-fill: #ECECEC;
+    --wheel-dormant-stroke: rgba(66,45,35,.24);
+    --font-serif: Georgia, "Times New Roman", serif;
+    --font-sans: Calibri, Candara, Segoe, "Segoe UI", Optima, Arial, sans-serif;
     --shadow: 3px 3px 0 rgba(66,45,35,0.08);
     --ease: cubic-bezier(.22,1,.36,1);
   }
@@ -65,7 +66,7 @@
   #cursorDot.hover { width: 34px; height: 34px; background: rgba(255,91,0,.14); }
   @media (pointer: coarse) { #cursorDot { display: none; } }
 
-  header.site-header { position: sticky; top: 0; z-index: 50; background: rgba(244,236,224,.86); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); padding: max(env(safe-area-inset-top), 14px) 0 14px; }
+  header.site-header { position: sticky; top: 0; z-index: 50; background: rgba(255,255,255,.86); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); padding: max(env(safe-area-inset-top), 14px) 0 14px; }
   header .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
   .logo-mark { height: 30px; width: auto; display: block; }
   .site-nav { display: flex; gap: 6px; flex-wrap: wrap; }
@@ -161,7 +162,7 @@
   .new-chip-pos { position: absolute; transform: translate(-50%, -50%) scale(0); transition: transform .55s cubic-bezier(.34,1.56,.64,1); }
   .new-chip-pos.show { transform: translate(-50%, -50%) scale(1); }
   .new-chip-pos .chip { animation: none; padding: 8px 10px 8px 0; }
-  .new-badge { position: absolute; top: -14px; right: -6px; background: var(--accent); color: #fff; font-size: 9px; font-weight: 800; letter-spacing: .3px; padding: 2px 6px; border-radius: 20px; box-shadow: var(--shadow); font-family: var(--font-sans); }
+  .new-badge { position: absolute; top: -14px; right: -6px; background: var(--accent); color: #fff; font-size: 9px; font-weight: 700; letter-spacing: .3px; padding: 2px 6px; border-radius: 20px; box-shadow: var(--shadow); font-family: var(--font-sans); }
   .chip-glow { animation: glowPulse 1.3s ease-out 2; }
   @keyframes glowPulse { 0% { box-shadow: 0 0 0 0 rgba(255,91,0,.5); } 100% { box-shadow: 0 0 0 20px rgba(255,91,0,0); } }
   .restructure-btn { margin-top: 20px; padding: 12px 22px; font-size: 14px; font-weight: 700; font-family: var(--font-sans); color: #fff; background: var(--accent); border: none; border-radius: 10px; cursor: pointer; box-shadow: var(--shadow); transition: transform .3s var(--ease), background .3s; }
@@ -220,7 +221,7 @@
   .scr-tap-hint { font-size: 9px; color: var(--text-muted); text-align: center; margin: 8px 0 0; }
 
   .scr-menu { display: flex; flex-direction: column; height: 100%; padding: 14px 12px; gap: 4px; }
-  .scr-menu-title { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: .6px; color: var(--text-muted); margin: 0 0 8px; }
+  .scr-menu-title { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; color: var(--text-muted); margin: 0 0 8px; }
   .scr-menu-item { font-size: 10.5px; font-weight: 700; color: rgba(255,91,0,.4); padding: 8px 8px; border-radius: 8px; }
   .scr-menu-item.is-on { background: var(--accent-soft); color: var(--accent); }
 
