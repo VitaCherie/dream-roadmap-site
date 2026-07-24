@@ -297,11 +297,15 @@ const esc = s => (s || "").replace(/[&<>"]/g, m => ({ "&":"&amp;","<":"&lt;",">"
 const svgns = "http://www.w3.org/2000/svg";
 const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+// Outer pillar radius pushed out to 320 (from 285) so there's enough room
+// for a logo to sit inside a wedge without its bounding-box corners poking
+// past the outer rim -- the wheel has headroom to 340 before the viewBox
+// edge, so this still leaves margin for stroke/shadow.
 const WEDGES = [
-  {key:'tools',     d:'M340,55 A285,285 0 0,1 625,340 L525,340 A185,185 0 0,0 340,155 Z', lx:506.17, ly:173.83},
-  {key:'media',     d:'M625,340 A285,285 0 0,1 340,625 L340,525 A185,185 0 0,0 525,340 Z', lx:506.17, ly:506.17},
-  {key:'funding',   d:'M340,625 A285,285 0 0,1 55,340 L155,340 A185,185 0 0,0 340,525 Z', lx:173.83, ly:506.17},
-  {key:'portfolio', d:'M55,340 A285,285 0 0,1 340,55 L340,155 A185,185 0 0,0 155,340 Z', lx:173.83, ly:173.83}
+  {key:'tools',     d:'M340,20 A320,320 0 0,1 660,340 L525,340 A185,185 0 0,0 340,155 Z', lx:518.6, ly:161.4},
+  {key:'media',     d:'M660,340 A320,320 0 0,1 340,660 L340,525 A185,185 0 0,0 525,340 Z', lx:518.6, ly:518.6},
+  {key:'funding',   d:'M340,660 A320,320 0 0,1 20,340 L155,340 A185,185 0 0,0 340,525 Z', lx:161.4, ly:518.6},
+  {key:'portfolio', d:'M20,340 A320,320 0 0,1 340,20 L340,155 A185,185 0 0,0 155,340 Z', lx:161.4, ly:161.4}
 ];
 
 // The gap ring between the hub and the four pillars: Physical Spaces isn't
@@ -329,7 +333,7 @@ const RAMPS = {
 const LOGO_ASPECT = {
   hub: 1121/464, tools: 1199/378, media: 1223/608, funding: 1092/483, portfolio: 975/657
 };
-const PILLAR_BOX = {w: 160, h: 54};
+const PILLAR_BOX = {w: 125, h: 44};
 const HUB_BOX = {w: 192, h: 90};
 function fitBox(aspect, box) {
   let w = box.h * aspect, h = box.h;
@@ -477,28 +481,31 @@ function renderWheelSVG(svgEl, data, mode) {
     t.textContent = label;
     svgEl.appendChild(t);
   };
-  colTitle(260, "Internal Resources");
+  colTitle(270, "Internal Resources");
   data.orgChart.shared.forEach((item, i) => {
     const t = document.createElementNS(svgns,"text");
-    t.setAttribute("x","260"); t.setAttribute("y", 376 + i*12);
+    t.setAttribute("x","270"); t.setAttribute("y", 376 + i*12);
     t.setAttribute("text-anchor","middle"); t.setAttribute("dominant-baseline","central");
     t.style.cssText = "font-size:9.5px;font-family:var(--font-sans);fill:var(--text-secondary)";
     t.textContent = item;
     svgEl.appendChild(t);
   });
 
-  // bottom half, right column: Partnerships Engine, with Dream Ventures underneath
-  colTitle(420, "Partnerships Engine");
+  // bottom half, right column: Partnerships Engine, with Dream Ventures underneath.
+  // Centered on 410 (the true midpoint of the 340-480 half, mirroring the
+  // left column's 270) -- it was sitting at 420, which pushed the long
+  // "invests in outside startups" line past the hub circle's right edge.
+  colTitle(410, "Partnerships Engine");
   const venturesTitle = document.createElementNS(svgns,"text");
-  venturesTitle.setAttribute("x","420"); venturesTitle.setAttribute("y","382");
+  venturesTitle.setAttribute("x","410"); venturesTitle.setAttribute("y","382");
   venturesTitle.setAttribute("text-anchor","middle"); venturesTitle.setAttribute("dominant-baseline","central");
   venturesTitle.style.cssText = "font-size:11px;font-weight:700;font-style:italic;font-family:var(--font-serif);fill:var(--text-primary)";
   venturesTitle.textContent = "Dream Ventures";
   svgEl.appendChild(venturesTitle);
   const venturesSub = document.createElementNS(svgns,"text");
-  venturesSub.setAttribute("x","420"); venturesSub.setAttribute("y","396");
+  venturesSub.setAttribute("x","410"); venturesSub.setAttribute("y","396");
   venturesSub.setAttribute("text-anchor","middle"); venturesSub.setAttribute("dominant-baseline","central");
-  venturesSub.style.cssText = "font-size:8.5px;font-family:var(--font-sans);fill:var(--text-secondary)";
+  venturesSub.style.cssText = "font-size:7.5px;font-family:var(--font-sans);fill:var(--text-secondary)";
   venturesSub.textContent = "invests in outside startups";
   svgEl.appendChild(venturesSub);
 
@@ -747,7 +754,11 @@ function buildRestructure(container, data) {
     chipEls[item.key] = { pos, chip, content };
   });
 
-  const targets = { hub: { x: 340, y: 340 } };
+  // 254 matches the vertical center renderWheelSVG actually places the hub
+  // logo at (top half of the hub circle) -- targeting the circle's true
+  // center (340) made the converged "Dream" chip overlap the resource
+  // columns in the bottom half.
+  const targets = { hub: { x: 340, y: 254 } };
   WEDGES.forEach(w => { targets[w.key] = { x: w.lx, y: w.ly }; });
 
   const newChipEls = {};
