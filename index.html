@@ -160,6 +160,7 @@
   .chip-logo { width: 100%; height: 100%; object-fit: contain; display: block; }
   .chip-wordmark { font-family: var(--font-serif); font-style: italic; font-weight: 700; font-size: 13.5px; color: var(--text-primary); white-space: nowrap; }
   .chip-tag { position: absolute; top: 100%; left: 50%; transform: translateX(-50%); margin-top: 5px; font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; color: var(--accent-dark); background: var(--accent-soft); padding: 2px 8px; border-radius: 20px; white-space: nowrap; opacity: 0; transition: opacity .4s ease; }
+  .chip-tag.above { top: auto; bottom: 100%; margin-top: 0; margin-bottom: 5px; }
   .stage.restructured .chip-tag { opacity: 1; transition: opacity .5s ease 1.05s; }
   .new-chip-pos { position: absolute; transform: translate(-50%, -50%) scale(0); transition: transform .55s cubic-bezier(.34,1.56,.64,1); }
   .new-chip-pos.show { transform: translate(-50%, -50%) scale(1); }
@@ -297,15 +298,22 @@ const esc = s => (s || "").replace(/[&<>"]/g, m => ({ "&":"&amp;","<":"&lt;",">"
 const svgns = "http://www.w3.org/2000/svg";
 const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-// Outer pillar radius pushed out to 320 (from 285) so there's enough room
-// for a logo to sit inside a wedge without its bounding-box corners poking
-// past the outer rim -- the wheel has headroom to 340 before the viewBox
-// edge, so this still leaves margin for stroke/shadow.
+// Outer pillar radius, and the point each pillar logo is centered on, are
+// chosen so a logo box's *corner* (not just its center) stays inside the
+// wedge -- an axis-aligned box centered on a point at radius r reaches out
+// to sqrt((r/sqrt2 + halfW)^2 + (r/sqrt2 + halfH)^2) from the wheel's
+// center, which is bigger than r itself. Solved so even the widest pillar
+// logo (Dream Banking, at the fixed height every pillar logo uses) keeps
+// ~15px of clearance from this rim, with a further ~15px from there to the
+// viewBox edge (340 from center).
+const PILLAR_OUTER_R = 325;
+const PILLAR_INNER_R = 185;
+const PILLAR_OFFSET = (PILLAR_INNER_R + PILLAR_OUTER_R) / 2 / Math.SQRT2; // 180.31
 const WEDGES = [
-  {key:'tools',     d:'M340,20 A320,320 0 0,1 660,340 L525,340 A185,185 0 0,0 340,155 Z', lx:518.6, ly:161.4},
-  {key:'media',     d:'M660,340 A320,320 0 0,1 340,660 L340,525 A185,185 0 0,0 525,340 Z', lx:518.6, ly:518.6},
-  {key:'funding',   d:'M340,660 A320,320 0 0,1 20,340 L155,340 A185,185 0 0,0 340,525 Z', lx:161.4, ly:518.6},
-  {key:'portfolio', d:'M20,340 A320,320 0 0,1 340,20 L340,155 A185,185 0 0,0 155,340 Z', lx:161.4, ly:161.4}
+  {key:'tools',     d:'M340,15 A325,325 0 0,1 665,340 L525,340 A185,185 0 0,0 340,155 Z', lx:340+PILLAR_OFFSET, ly:340-PILLAR_OFFSET},
+  {key:'media',     d:'M665,340 A325,325 0 0,1 340,665 L340,525 A185,185 0 0,0 525,340 Z', lx:340+PILLAR_OFFSET, ly:340+PILLAR_OFFSET},
+  {key:'funding',   d:'M340,665 A325,325 0 0,1 15,340 L155,340 A185,185 0 0,0 340,525 Z', lx:340-PILLAR_OFFSET, ly:340+PILLAR_OFFSET},
+  {key:'portfolio', d:'M15,340 A325,325 0 0,1 340,15 L340,155 A185,185 0 0,0 155,340 Z', lx:340-PILLAR_OFFSET, ly:340-PILLAR_OFFSET}
 ];
 
 // The gap ring between the hub and the four pillars: Physical Spaces isn't
@@ -327,25 +335,28 @@ const RAMPS = {
   fund:      {fill:'#F7E1E9', stroke:'#C80045', title:'#A30039', sub:'#C80045'}
 };
 
-// Native aspect ratios (w/h) of each logo file, used to fit every pillar logo
-// into the same bounding box so no logo reads visually bigger than another.
-// Dream App gets its own, larger box -- it's the one thing meant to dominate.
+// Native aspect ratios (w/h) of each logo file. Every pillar logo is drawn
+// at the SAME fixed height (not fit into a box whose width also clamps it)
+// so they read as genuinely the same size regardless of how wide or narrow
+// the wordmark is -- width just follows from the logo's own aspect ratio.
 const LOGO_ASPECT = {
   hub: 1121/464, tools: 1199/378, media: 1223/608, funding: 1092/483, portfolio: 975/657
 };
-const PILLAR_BOX = {w: 125, h: 44};
-const HUB_BOX = {w: 192, h: 90};
-function fitBox(aspect, box) {
-  let w = box.h * aspect, h = box.h;
-  if (w > box.w) { w = box.w; h = box.w / aspect; }
-  return {w, h};
+// 36px is sized for the worst case: Dream Banking is the widest logo
+// (aspect 3.17), and at height 36 its bounding-box corner still lands
+// ~15px inside the PILLAR_OUTER_R rim. Every other, narrower logo has
+// even more clearance at the same height.
+const PILLAR_LOGO_H = 36;
+const HUB_LOGO_H = 60;
+function heightBox(aspect, h) {
+  return { w: h * aspect, h };
 }
-// Same fit-box math, expressed as a % of the 680-unit viewBox, so the
-// floating restructure chips scale with the wheel instead of overflowing it
-// at a fixed pixel size on narrower stages.
+// Same math, expressed as a % of the 680-unit viewBox, so the floating
+// restructure chips scale with the wheel instead of overflowing it at a
+// fixed pixel size on narrower stages.
 function chipBoxPct(key) {
-  const box = key === "hub" ? HUB_BOX : PILLAR_BOX;
-  const dims = fitBox(LOGO_ASPECT[key], box);
+  const h = key === "hub" ? HUB_LOGO_H : PILLAR_LOGO_H;
+  const dims = heightBox(LOGO_ASPECT[key], h);
   return { w: dims.w / 680 * 100, h: dims.h / 680 * 100 };
 }
 
@@ -436,28 +447,33 @@ function renderWheelSVG(svgEl, data, mode) {
   }
 
   // top half of the hub: Dream App, large and the clear visual anchor.
+  // Fixed position/size, solved the same way as the pillar logos: at
+  // HUB_LOGO_H=60 with its top edge at y=235, the box's top corner sits
+  // ~12px inside the hub circle's r=140 rim (rather than just checking the
+  // logo's center point, which is what let it poke out before).
   // Static mode (the restructure preview) leaves this half empty -- the
   // animated "hub" chip supplies the logo + "App" tag there instead, so we
   // never draw the same logo twice in the same spot.
-  const hd = fitBox(LOGO_ASPECT.hub, HUB_BOX);
+  const hd = heightBox(LOGO_ASPECT.hub, HUB_LOGO_H);
+  const hubLogoTop = 235, hubLogoBottom = hubLogoTop + HUB_LOGO_H;
   if (interactive) {
     const hubImg = document.createElementNS(svgns,"image");
     hubImg.setAttribute("href","logos/"+data.hub.logo); hubImg.setAttributeNS("http://www.w3.org/1999/xlink","href","logos/"+data.hub.logo);
-    hubImg.setAttribute("x", 340-hd.w/2); hubImg.setAttribute("y", 215-hd.h/2+39);
+    hubImg.setAttribute("x", 340-hd.w/2); hubImg.setAttribute("y", hubLogoTop);
     hubImg.setAttribute("width", hd.w); hubImg.setAttribute("height", hd.h);
     hubImg.setAttribute("id","hub-title");
     svgEl.appendChild(hubImg);
     const hubAppTag = document.createElementNS(svgns,"text");
-    hubAppTag.setAttribute("x","340"); hubAppTag.setAttribute("y", 254+hd.h/2+18);
+    hubAppTag.setAttribute("x","340"); hubAppTag.setAttribute("y", hubLogoBottom + 14);
     hubAppTag.setAttribute("text-anchor","middle"); hubAppTag.setAttribute("dominant-baseline","central");
-    hubAppTag.style.cssText = "font-size:16px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;font-family:var(--font-sans);fill:var(--accent-dark)";
+    hubAppTag.style.cssText = "font-size:14px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;font-family:var(--font-sans);fill:var(--accent-dark)";
     hubAppTag.textContent = "App";
     svgEl.appendChild(hubAppTag);
     const hubSub = document.createElementNS(svgns,"text");
     hubSub.setAttribute("id","hub-sub");
-    hubSub.setAttribute("x","340"); hubSub.setAttribute("y", 254+hd.h/2+34);
+    hubSub.setAttribute("x","340"); hubSub.setAttribute("y", hubLogoBottom + 29);
     hubSub.setAttribute("text-anchor","middle"); hubSub.setAttribute("dominant-baseline","central");
-    hubSub.style.cssText = "font-size:10px;font-family:var(--font-sans);fill:var(--text-secondary)";
+    hubSub.style.cssText = "font-size:9px;font-family:var(--font-sans);fill:var(--text-secondary)";
     hubSub.textContent = data.hub.subBefore;
     svgEl.appendChild(hubSub);
   }
@@ -509,15 +525,18 @@ function renderWheelSVG(svgEl, data, mode) {
   venturesSub.textContent = "invests in outside startups";
   svgEl.appendChild(venturesSub);
 
-  // the four pillar logos, every one fit into the same box so none dominates.
-  // Static mode (the restructure preview) skips these -- the scattered/new
-  // chips supply the pillar logos there instead, at these exact same points.
+  // The four pillar logos, every one drawn at the same fixed height
+  // (PILLAR_LOGO_H) so none reads bigger or smaller than another. Static
+  // mode (the restructure preview) skips these -- the scattered/new chips
+  // supply the pillar logos there instead, at these exact same points.
+  // Portfolio's caption ("Portfolio") sits ABOVE its logo, like a label --
+  // the logo itself (DreamBrew) shifts down slightly to make room.
   if (interactive) {
     WEDGES.forEach(w => {
       const div = data.divisions[w.key];
-      const dims = fitBox(LOGO_ASPECT[w.key], PILLAR_BOX);
+      const dims = heightBox(LOGO_ASPECT[w.key], PILLAR_LOGO_H);
       const hasSub = !!div.sub;
-      const logoCenterY = hasSub ? w.ly - 14 : w.ly;
+      const logoCenterY = hasSub ? w.ly + 12 : w.ly;
       const img = document.createElementNS(svgns,"image");
       img.setAttribute("href","logos/"+div.logo); img.setAttributeNS("http://www.w3.org/1999/xlink","href","logos/"+div.logo);
       img.setAttribute("x", w.lx - dims.w/2); img.setAttribute("y", logoCenterY - dims.h/2);
@@ -526,9 +545,9 @@ function renderWheelSVG(svgEl, data, mode) {
       svgEl.appendChild(img);
       const sub = document.createElementNS(svgns,"text");
       sub.setAttribute("id", w.key+"-sub");
-      sub.setAttribute("x", w.lx); sub.setAttribute("y", logoCenterY + dims.h/2 + 14);
+      sub.setAttribute("x", w.lx); sub.setAttribute("y", logoCenterY - dims.h/2 - 12);
       sub.setAttribute("text-anchor","middle"); sub.setAttribute("dominant-baseline","central");
-      sub.style.cssText = "font-size:12px;font-family:var(--font-sans);fill:var(--text-secondary)";
+      sub.style.cssText = "font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;font-family:var(--font-sans);fill:var(--text-secondary)";
       sub.textContent = div.sub || "";
       svgEl.appendChild(sub);
     });
@@ -748,17 +767,17 @@ function buildRestructure(container, data) {
     const content = makeChipContent(item.label, item.logo, item.key === "hub");
     chip.appendChild(content);
     pos.appendChild(chip);
-    if (item.key === "portfolio") pos.appendChild(el("div", "chip-tag", "Portfolio"));
+    if (item.key === "portfolio") pos.appendChild(el("div", "chip-tag above", "Portfolio"));
     if (item.key === "hub") pos.appendChild(el("div", "chip-tag", "App"));
     stage.appendChild(pos);
     chipEls[item.key] = { pos, chip, content };
   });
 
-  // 254 matches the vertical center renderWheelSVG actually places the hub
+  // 265 matches the vertical center renderWheelSVG actually places the hub
   // logo at (top half of the hub circle) -- targeting the circle's true
   // center (340) made the converged "Dream" chip overlap the resource
   // columns in the bottom half.
-  const targets = { hub: { x: 340, y: 254 } };
+  const targets = { hub: { x: 340, y: 265 } };
   WEDGES.forEach(w => { targets[w.key] = { x: w.lx, y: w.ly }; });
 
   const newChipEls = {};
