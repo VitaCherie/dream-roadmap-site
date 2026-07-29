@@ -53,7 +53,12 @@
     -webkit-font-smoothing: antialiased; line-height: 1.4;
     cursor: default;
   }
-  .wrap { max-width: 1160px; margin: 0 auto; padding: 0 20px; }
+  /* width:100% is deliberate, not decorative: inside the slide sections'
+     flex column, .wrap would otherwise shrink-wrap to its content instead
+     of stretching to fill (a real flex quirk when a descendant, like an
+     SVG sized via width="100%", creates a circular auto-width dependency),
+     silently making some slides render much narrower than others. */
+  .wrap { width: 100%; max-width: 1160px; margin: 0 auto; padding: 0 20px; }
   .eyebrow { font-size: 12px; font-weight: 700; color: var(--accent-dark); text-transform: uppercase; letter-spacing: 1px; margin: 0 0 6px; text-align: left; }
   h1 { font-family: var(--font-serif); font-size: 32px; margin: 0; font-weight: 700; letter-spacing: -0.2px; text-align: left; }
   h1 em { color: var(--accent-dark); font-style: italic; }
@@ -93,7 +98,15 @@
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    /* Plain "center" hides the headline above the fold on any slide whose
+       content is taller than the viewport -- it centers the OVERFLOW too,
+       so the top (which is always the eyebrow/headline) scrolls out of
+       view and a section opens looking like it's missing its own title.
+       "safe center" is the fix: centers when content fits, top-aligns
+       when it doesn't. flex-start is a plain-"center"-free fallback for
+       engines that don't parse "safe center" at all. */
+    justify-content: flex-start;
+    justify-content: safe center;
   }
   section.section.alt { background: var(--surface-2); }
   section.section + section.section { border-top: 1px solid var(--border); }
@@ -218,7 +231,7 @@
   }
 
   /* Org chart */
-  .org-standalone { margin-top: 3rem; max-width: 760px; }
+  .org-standalone { margin-top: 3rem; max-width: 1040px; }
   .org-svg { display: block; margin-top: 1.5rem; }
 
   /* Journey: path tabs + phone mockups */
@@ -1421,6 +1434,10 @@ function initSlides() {
   const setHeaderH = () => document.documentElement.style.setProperty("--header-h", header.offsetHeight + "px");
   setHeaderH();
   window.addEventListener("resize", setHeaderH);
+  // Re-measure once more shortly after load: if a web font swaps in and
+  // reflows the header after this first pass, every slide's height was
+  // computed off the wrong number and stays wrong until the next resize.
+  setTimeout(setHeaderH, 300);
 
   function slideAtScrollPos() {
     const headerH = header.offsetHeight;
