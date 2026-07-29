@@ -86,7 +86,7 @@
      silently break it entirely -- the Next button/nav links already land
      exactly on each section's top via scroll-margin-top, which is enough. */
   section.section {
-    padding: 40px 0 64px;
+    padding: 40px 0 92px;
     scroll-margin-top: var(--header-h, 64px);
     height: calc(100vh - var(--header-h, 64px));
     height: calc(100dvh - var(--header-h, 64px));
@@ -176,7 +176,10 @@
   .future-detail { font-size: 13.5px; color: var(--text-secondary); line-height: 1.5; margin: 0; }
 
   /* Restructure section */
-  .restructure-row { display: grid; grid-template-columns: minmax(380px, 620px) 1fr; gap: 32px; align-items: start; margin-top: 1.1rem; }
+  /* minmax capped at 460 (was 620) so the wheel takes less vertical room on
+     a one-screen slide, and align-items:center so the vision card centers
+     against the wheel rather than starting flush with its top. */
+  .restructure-row { display: grid; grid-template-columns: minmax(320px, 460px) 1fr; gap: 32px; align-items: center; margin-top: 1.1rem; }
   @media (max-width: 900px) { .restructure-row { grid-template-columns: 1fr; } }
   .stage { position: relative; width: 100%; aspect-ratio: 680 / 680; }
   .stage svg.stage-wheel { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; transition: opacity 1.1s ease; }
@@ -751,14 +754,16 @@ function buildWheel(container, data) {
   tlSvg.addEventListener("pointercancel", () => { dragging = false; });
 
   setPhase(1);
+}
 
-  // Looking further ahead: simplified 3yr / 5yr outlook
-  const futureWrap = el("div", "reveal");
-  futureWrap.style.marginTop = "3rem";
-  futureWrap.appendChild(el("p", "eyebrow", data.future.eyebrow));
-  futureWrap.appendChild(el("h1", null, data.future.headline));
-  futureWrap.appendChild(el("p", "subtitle", data.future.subtitle));
-  const futureRow = el("div", "future-row");
+// Its own slide, separate from the roadmap wheel -- it used to be appended
+// straight onto the wheel's own slide, making that single slide's internal
+// scroll drag in a second, unrelated idea instead of ending cleanly.
+function buildFuture(container, data) {
+  container.appendChild(el("p", "eyebrow reveal", data.future.eyebrow));
+  container.appendChild(el("h1", "reveal", data.future.headline));
+  container.appendChild(el("p", "subtitle reveal", data.future.subtitle));
+  const futureRow = el("div", "future-row reveal");
   data.future.milestones.forEach(m => {
     const card = el("div", "future-card");
     card.appendChild(el("p", "future-year", m.year));
@@ -766,8 +771,7 @@ function buildWheel(container, data) {
     card.appendChild(el("p", "future-detail", esc(m.detail)));
     futureRow.appendChild(card);
   });
-  futureWrap.appendChild(futureRow);
-  container.appendChild(futureWrap);
+  container.appendChild(futureRow);
 }
 
 function buildRestructure(container, data) {
@@ -1092,6 +1096,19 @@ function buildPhoneScreen(s) {
   return el("div");
 }
 
+// Its own slide, separate from the customer-journey one -- they used to
+// share a section and get crammed into one internally-scrolling slide,
+// which read as two different ideas awkwardly merged into one.
+function buildOrgChartSection(container, data) {
+  const oc = data.orgChart;
+  container.appendChild(el("p", "eyebrow reveal", oc.eyebrow));
+  container.appendChild(el("h1", "reveal", oc.headline));
+  container.appendChild(el("p", "subtitle reveal", oc.subtitle));
+  const orgWrap = el("div", "org-standalone reveal");
+  buildOrgChart(orgWrap, data);
+  container.appendChild(orgWrap);
+}
+
 function buildJourney(container, data) {
   const j = data.journey;
   container.appendChild(el("p", "eyebrow reveal", j.eyebrow));
@@ -1139,14 +1156,6 @@ function buildJourney(container, data) {
   compareHeading.style.cssText = "font-weight:700;font-size:15px;margin:0;";
   container.appendChild(compareHeading);
   container.appendChild(compareRow);
-
-  const orgWrap = el("div", "org-standalone reveal");
-  const oc = data.orgChart;
-  orgWrap.appendChild(el("p", "eyebrow", oc.eyebrow));
-  orgWrap.appendChild(el("h1", null, oc.headline));
-  orgWrap.appendChild(el("p", "subtitle", oc.subtitle));
-  buildOrgChart(orgWrap, data);
-  container.appendChild(orgWrap);
 }
 
 /* ---------- Conclusion ---------- */
@@ -1246,7 +1255,12 @@ function render(data) {
   const journeyInner = el("div", "wrap"); journeySection.appendChild(journeyInner);
   buildJourney(journeyInner, data);
 
-  const roadmapSection = el("section", "section reveal"); roadmapSection.id = "roadmap";
+  const orgchartSection = el("section", "section reveal"); orgchartSection.id = "orgchart";
+  app.appendChild(orgchartSection);
+  const orgchartInner = el("div", "wrap"); orgchartSection.appendChild(orgchartInner);
+  buildOrgChartSection(orgchartInner, data);
+
+  const roadmapSection = el("section", "section alt reveal"); roadmapSection.id = "roadmap";
   app.appendChild(roadmapSection);
   const roadmapInner = el("div", "wrap"); roadmapSection.appendChild(roadmapInner);
   roadmapInner.appendChild(el("p", "eyebrow", "Dream &middot; internal roadmap"));
@@ -1255,6 +1269,11 @@ function render(data) {
   const wheelHost = el("div");
   roadmapInner.appendChild(wheelHost);
   buildWheel(wheelHost, data);
+
+  const futureSection = el("section", "section reveal"); futureSection.id = "future";
+  app.appendChild(futureSection);
+  const futureInner = el("div", "wrap"); futureSection.appendChild(futureInner);
+  buildFuture(futureInner, data);
 
   const conclusionSection = el("section", "section alt reveal"); conclusionSection.id = "conclusion";
   app.appendChild(conclusionSection);
@@ -1269,7 +1288,7 @@ function render(data) {
   const nav = document.getElementById("siteNav");
   nav.hidden = false;
   nav.innerHTML = "";
-  [["Intro","#intro"],["Restructure","#restructure"],["How you fit in","#journey"],["Roadmap","#roadmap"],["Resources","#resources"]].forEach(([label, href], i) => {
+  [["Intro","#intro"],["Restructure","#restructure"],["How you fit in","#journey"],["Org structure","#orgchart"],["Roadmap","#roadmap"],["Resources","#resources"]].forEach(([label, href], i) => {
     const a = el("a", "magnetic" + (i === 1 ? " active" : ""), label);
     a.href = href;
     nav.appendChild(a);
@@ -1356,7 +1375,7 @@ function initEffects() {
     statEls.forEach(animateCount);
   }
 
-  const sections = ["intro","restructure","journey","roadmap","resources"].map(id => document.getElementById(id)).filter(Boolean);
+  const sections = ["intro","restructure","journey","orgchart","roadmap","resources"].map(id => document.getElementById(id)).filter(Boolean);
   const navLinks = Array.from(document.querySelectorAll("#siteNav a"));
   if (sections.length && navLinks.length && "IntersectionObserver" in window) {
     const spy = new IntersectionObserver((entries) => {
@@ -1396,7 +1415,7 @@ function initEffects() {
 // each section's height/snap-point excludes it, and drives the fixed
 // "Next" button -- which advances the conclusion slide's own ask-by-ask
 // pager before it's allowed to move to the next section.
-const SLIDE_ORDER = ["cover", "intro", "restructure", "journey", "roadmap", "conclusion", "resources"];
+const SLIDE_ORDER = ["cover", "intro", "restructure", "journey", "orgchart", "roadmap", "future", "conclusion", "resources"];
 function initSlides() {
   const header = document.querySelector(".site-header");
   const setHeaderH = () => document.documentElement.style.setProperty("--header-h", header.offsetHeight + "px");
