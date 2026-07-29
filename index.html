@@ -43,7 +43,10 @@
     --ease: cubic-bezier(.22,1,.36,1);
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  html { scroll-behavior: smooth; }
+  /* No CSS scroll-behavior: smooth -- it fights with programmatic
+     scrollIntoView (a real, long-standing Chromium interaction bug) and can
+     silently stop it from moving the page at all. Nav/Next-button jumps
+     handle their own smoothness in JS instead. */
   body {
     margin: 0; background: var(--bg); color: var(--text-primary);
     font-family: var(--font-sans);
@@ -74,9 +77,37 @@
   .site-nav a.active { background: var(--accent); border-color: var(--accent); color: #fff; }
 
   main { display: block; }
-  section.section { padding: 56px 0 64px; scroll-margin-top: 78px; }
+  /* One section = one slide: each is exactly a viewport tall (minus the
+     sticky header) and scrolls internally if its own content is taller than
+     that -- so presenting only ever shows one section at a time, never two
+     stacked. --header-h is measured in JS since the header's padding
+     depends on safe-area-inset-top. Deliberately no CSS scroll-snap here:
+     snap-type fights with smooth scrollIntoView in some engines and can
+     silently break it entirely -- the Next button/nav links already land
+     exactly on each section's top via scroll-margin-top, which is enough. */
+  section.section {
+    padding: 40px 0 64px;
+    scroll-margin-top: var(--header-h, 64px);
+    height: calc(100vh - var(--header-h, 64px));
+    height: calc(100dvh - var(--header-h, 64px));
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
   section.section.alt { background: var(--surface-2); }
   section.section + section.section { border-top: 1px solid var(--border); }
+
+  /* Fixed "Next" control -- advances to the next slide; on the conclusion
+     slide it instead reveals the next ask before it starts moving slides. */
+  .next-btn { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 55;
+    display: flex; align-items: center; gap: 7px; font-family: var(--font-sans); font-weight: 700; font-size: 13px;
+    color: #fff; background: var(--text-primary); border: none; padding: 11px 20px; border-radius: 30px;
+    cursor: pointer; box-shadow: var(--shadow); transition: opacity .3s, transform .3s var(--ease), background .3s; }
+  .next-btn:hover { background: var(--accent); }
+  .next-btn .next-arrow { display: inline-block; transition: transform .3s var(--ease); }
+  .next-btn.hidden { opacity: 0; pointer-events: none; transform: translateX(-50%) translateY(10px); }
+  @media (max-width: 480px) { .next-btn { bottom: 14px; padding: 10px 16px; font-size: 12px; } }
 
   .reveal { opacity: 0; transform: translateY(20px); transition: opacity .7s var(--ease), transform .7s var(--ease); }
   .reveal.is-visible { opacity: 1; transform: translateY(0); }
@@ -251,13 +282,19 @@
   a.res-btn { background: var(--accent); color: #fff; }
   span.res-btn { background: var(--border); color: var(--text-muted); cursor: default; }
 
-  /* Conclusion */
-  .asks-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap: 18px; margin-top: 22px; }
-  .ask-card { border-left: 4px solid var(--accent); background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; box-shadow: var(--shadow); }
-  .ask-num { font-family: var(--font-serif); font-size: 24px; font-weight: 700; color: var(--accent-dark); }
-  .ask-title { font-weight: 700; font-size: 14.5px; margin: 8px 0 4px; }
-  .ask-detail { font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin: 0; }
-  .closing-banner { background: var(--text-primary); color: #fff; border-radius: 16px; padding: 28px 30px; margin-top: 32px; box-shadow: var(--shadow); }
+  /* Conclusion -- one ask revealed at a time via the Next button, so a
+     presenter controls the reveal instead of the audience seeing all 4 at
+     once. Dots track progress; the closing banner is the pager's last page. */
+  .ask-stage { margin-top: 22px; max-width: 520px; }
+  .ask-card { border-left: 4px solid var(--accent); background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px; padding: 20px 24px; box-shadow: var(--shadow); }
+  .ask-num { font-family: var(--font-serif); font-size: 28px; font-weight: 700; color: var(--accent-dark); }
+  .ask-title { font-weight: 700; font-size: 16px; margin: 10px 0 5px; }
+  .ask-detail { font-size: 13.5px; color: var(--text-secondary); line-height: 1.55; margin: 0; }
+  .ask-dots { display: flex; gap: 8px; margin-top: 18px; }
+  .ask-dots span { width: 8px; height: 8px; border-radius: 50%; background: var(--border-strong); transition: background .3s, transform .3s var(--ease); }
+  .ask-dots span.done { background: var(--accent); }
+  .ask-dots span.current { background: var(--accent-dark); transform: scale(1.3); }
+  .closing-banner { background: var(--text-primary); color: #fff; border-radius: 16px; padding: 28px 30px; margin-top: 22px; max-width: 520px; box-shadow: var(--shadow); }
   .closing-banner .cb-quote { font-family: var(--font-serif); font-size: 28px; font-weight: 700; margin: 0 0 10px; }
   .closing-banner .cb-quote em { color: var(--accent); font-style: italic; }
   .closing-banner .cb-body { font-size: 14px; line-height: 1.6; margin: 0; opacity: .9; }
@@ -291,6 +328,7 @@
   <div class="gate-wrap"><p style="color:var(--text-muted)">Loading&hellip;</p></div>
 </main>
 <footer id="foot"></footer>
+<button id="nextBtn" class="next-btn hidden" type="button">Next <span class="next-arrow">&darr;</span></button>
 
 <script>
 const el = (t, c, h) => { const e = document.createElement(t); if (c) e.className = c; if (h != null) e.innerHTML = h; return e; };
@@ -1112,23 +1150,52 @@ function buildJourney(container, data) {
 }
 
 /* ---------- Conclusion ---------- */
+// Reveals one ask at a time (advanced by the global Next button) instead of
+// showing all 4 up front, so a presenter controls the pace. The closing
+// banner is the pager's final page, after the last ask.
 function buildConclusion(container, data) {
   const c = data.conclusion;
   container.appendChild(el("p", "eyebrow reveal", c.eyebrow));
   container.appendChild(el("h1", "reveal", c.headline));
-  const grid = el("div", "asks-grid reveal");
-  c.asks.forEach(a => {
-    const card = el("div", "ask-card");
-    card.appendChild(el("div", "ask-num", a.n));
-    card.appendChild(el("p", "ask-title", esc(a.title)));
-    if (a.detail) card.appendChild(el("p", "ask-detail", esc(a.detail)));
-    grid.appendChild(card);
-  });
-  container.appendChild(grid);
-  const closing = el("div", "closing-banner reveal");
-  closing.appendChild(el("p", "cb-quote", c.closing.headline));
-  closing.appendChild(el("p", "cb-body", esc(c.closing.body)));
-  container.appendChild(closing);
+
+  const stage = el("div", "ask-stage reveal");
+  container.appendChild(stage);
+  const dots = el("div", "ask-dots");
+  c.asks.forEach(() => dots.appendChild(el("span")));
+  container.appendChild(dots);
+
+  let step = 0; // 0..asks.length-1 = ask index; asks.length = closing page
+  function renderStep() {
+    stage.innerHTML = "";
+    if (step < c.asks.length) {
+      const a = c.asks[step];
+      const card = el("div", "ask-card");
+      card.appendChild(el("div", "ask-num", a.n));
+      card.appendChild(el("p", "ask-title", esc(a.title)));
+      if (a.detail) card.appendChild(el("p", "ask-detail", esc(a.detail)));
+      stage.appendChild(card);
+      dots.hidden = false;
+    } else {
+      const closing = el("div", "closing-banner");
+      closing.appendChild(el("p", "cb-quote", c.closing.headline));
+      closing.appendChild(el("p", "cb-body", esc(c.closing.body)));
+      stage.appendChild(closing);
+      dots.hidden = true;
+    }
+    Array.from(dots.children).forEach((d, i) => {
+      d.classList.toggle("done", i < step);
+      d.classList.toggle("current", i === step);
+    });
+  }
+  renderStep();
+
+  // Exposed so the global Next-button handler can drive this section's
+  // own pager before it's allowed to advance to the next slide.
+  container.__pager = {
+    atEnd: () => step >= c.asks.length,
+    advance: () => { if (step < c.asks.length) { step++; renderStep(); } },
+    reset: () => { step = 0; renderStep(); }
+  };
 }
 
 /* ---------- Resources ---------- */
@@ -1214,6 +1281,34 @@ function render(data) {
   initEffects();
 }
 
+// Scrolls a section to the top of the viewport (below the sticky header).
+// Animated via rAF rather than native `scroll-behavior: smooth` /
+// scrollIntoView's own smooth option, both of which have a real, long-
+// standing Chromium bug where they can silently fail to move the page at
+// all in some circumstances. A setTimeout safety net force-corrects the
+// final position regardless, so a stalled animation never leaves the page
+// stuck mid-scroll.
+function jumpToSection(target, onDone) {
+  const header = document.querySelector(".site-header");
+  const targetY = target.getBoundingClientRect().top + window.scrollY - header.offsetHeight;
+  if (prefersReduced) { window.scrollTo(0, targetY); if (onDone) onDone(); return; }
+  const startY = window.scrollY;
+  const delta = targetY - startY;
+  const duration = 450;
+  const start = performance.now();
+  function step(now) {
+    const t = Math.min(1, (now - start) / duration);
+    const eased = 1 - Math.pow(1 - t, 3);
+    window.scrollTo(0, startY + delta * eased);
+    if (t < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+  setTimeout(() => {
+    if (Math.abs(window.scrollY - targetY) > 2) window.scrollTo(0, targetY);
+    if (onDone) onDone();
+  }, duration + 120);
+}
+
 /* ---------- Cool-but-restrained motion layer ---------- */
 function animateCount(elm) {
   const target = parseFloat(elm.dataset.value);
@@ -1277,7 +1372,7 @@ function initEffects() {
     a.addEventListener("click", e => {
       e.preventDefault();
       const target = document.querySelector(a.getAttribute("href"));
-      if (target) target.scrollIntoView({ behavior: prefersReduced ? "auto" : "smooth", block: "start" });
+      if (target) jumpToSection(target);
     });
   });
 
@@ -1292,8 +1387,81 @@ function initEffects() {
   window.addEventListener("scroll", () => { if (!ticking) { requestAnimationFrame(updateProgress); ticking = true; } }, { passive: true });
   updateProgress();
 
+  initSlides();
   initCursor();
   initMagnetic();
+}
+
+// One-slide-at-a-time presentation mode: measures the sticky header so
+// each section's height/snap-point excludes it, and drives the fixed
+// "Next" button -- which advances the conclusion slide's own ask-by-ask
+// pager before it's allowed to move to the next section.
+const SLIDE_ORDER = ["cover", "intro", "restructure", "journey", "roadmap", "conclusion", "resources"];
+function initSlides() {
+  const header = document.querySelector(".site-header");
+  const setHeaderH = () => document.documentElement.style.setProperty("--header-h", header.offsetHeight + "px");
+  setHeaderH();
+  window.addEventListener("resize", setHeaderH);
+
+  function slideAtScrollPos() {
+    const headerH = header.offsetHeight;
+    let best = null, bestDelta = Infinity;
+    SLIDE_ORDER.forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const delta = Math.abs(el.getBoundingClientRect().top - headerH);
+      if (delta < bestDelta) { bestDelta = delta; best = id; }
+    });
+    return best;
+  }
+  function pagerFor(id) {
+    if (id !== "conclusion") return null;
+    const wrap = document.getElementById(id).querySelector(".wrap");
+    return wrap && wrap.__pager;
+  }
+
+  const nextBtn = document.getElementById("nextBtn");
+  // currentIdx is the source of truth for "which slide is active," updated
+  // immediately on click rather than re-derived from scroll position every
+  // time -- re-deriving it mid-animation was racy: a second Next click
+  // fired before the first jump finished would read a still-in-transit
+  // scroll position and silently eat the click instead of advancing.
+  let currentIdx = SLIDE_ORDER.indexOf(slideAtScrollPos());
+  if (currentIdx < 0) currentIdx = 0;
+  let jumping = false;
+
+  function setCurrentIdx(idx) {
+    currentIdx = idx;
+    const id = SLIDE_ORDER[idx];
+    const pager = pagerFor(id);
+    if (pager) pager.reset();
+    nextBtn.classList.toggle("hidden", idx === SLIDE_ORDER.length - 1);
+  }
+  setCurrentIdx(currentIdx);
+
+  // Manual scrolling (trackpad/wheel) or a nav-pill click still needs to
+  // keep currentIdx in sync -- but only once a jump we triggered ourselves
+  // has finished, so it doesn't fight with the click handler below.
+  let scrollDebounce = null;
+  window.addEventListener("scroll", () => {
+    if (jumping) return;
+    clearTimeout(scrollDebounce);
+    scrollDebounce = setTimeout(() => {
+      const id = slideAtScrollPos();
+      const idx = SLIDE_ORDER.indexOf(id);
+      if (idx >= 0 && idx !== currentIdx) setCurrentIdx(idx);
+    }, 120);
+  }, { passive: true });
+
+  nextBtn.addEventListener("click", () => {
+    const id = SLIDE_ORDER[currentIdx];
+    const pager = pagerFor(id);
+    if (pager && !pager.atEnd()) { pager.advance(); return; }
+    if (currentIdx >= SLIDE_ORDER.length - 1) return;
+    setCurrentIdx(currentIdx + 1);
+    jumping = true;
+    jumpToSection(document.getElementById(SLIDE_ORDER[currentIdx]), () => { jumping = false; });
+  });
 }
 
 function initCursor() {
