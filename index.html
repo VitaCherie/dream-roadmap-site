@@ -113,12 +113,14 @@
   section.section + section.section { border-top: 1px solid var(--border); }
 
   /* Photos "pinned" in a slide's side margins, tilted slightly like they're
-     stuck to a wall. Only shown once there's enough room beside the
-     1160px-wide .wrap for them to sit in without ever overlapping content. */
-  .wall-photo { position: absolute; width: 132px; padding: 7px 7px 20px; background: #fff;
+     stuck to a wall. Width is a JS-set custom property (see sizeWallPhotos)
+     rather than a fixed size + breakpoint guess: it measures the actual
+     margin beside .wrap on THIS screen and sizes photos to fit inside it,
+     so they show at whatever size fits rather than being an all-or-nothing
+     "wide enough or hidden" toggle keyed to an assumed viewport width. */
+  .wall-photo { position: absolute; width: var(--wall-photo-w, 132px); padding: 7px 7px 20px; background: #fff;
     border-radius: 3px; box-shadow: var(--shadow); z-index: 1; }
-  .wall-photo img { display: block; width: 100%; height: 130px; object-fit: cover; border-radius: 1px; }
-  @media (max-width: 1360px) { .wall-photo { display: none; } }
+  .wall-photo img { display: block; width: 100%; height: calc(var(--wall-photo-w, 132px) - 2px); object-fit: cover; border-radius: 1px; }
 
   /* Fixed "Next" control -- advances to the next slide; on the conclusion
      slide it instead reveals the next ask before it starts moving slides. */
@@ -363,15 +365,40 @@ const esc = s => (s || "").replace(/[&<>"]/g, m => ({ "&":"&amp;","<":"&lt;",">"
 // to a wall. Positioned relative to the whole section (not .wrap) so they
 // sit outside the 1160px content column in the free space beside it --
 // the CSS hides them entirely once the viewport's too narrow for that.
+// Half of .wrap's 1160px max-width -- photos anchor off THIS, not the
+// section's own edge. The section spans the full viewport, but .wrap stays
+// capped at 1160px and centers inside it, so anchoring to the section
+// (e.g. "right: 3%") put photos at a fixed fraction of viewport width that
+// had no fixed relationship to where the actual centered content ended --
+// on a narrower-but-still-"wide-enough" screen that put them right on top
+// of the text. calc(50% + 580px + gap) instead measures out from .wrap's
+// true edge every time, so a photo is only ever exactly `gap` px beyond
+// the content column, regardless of viewport width.
+const WRAP_HALF = 580;
 function addWallPhotos(section, photos) {
   photos.forEach(p => {
     const frame = el("div", "wall-photo");
-    frame.style.cssText = "top:" + p.top + ";" + p.side + ":" + p.offset + ";transform:rotate(" + p.rot + "deg);";
+    const edge = p.side === "right" ? "left" : "right";
+    frame.style.cssText = "top:" + p.top + ";" + edge + ":calc(50% + " + WRAP_HALF + "px + " + p.gap + "px);transform:rotate(" + p.rot + "deg);";
     const img = el("img");
     img.src = "photos/" + p.src; img.alt = "";
     frame.appendChild(img);
     section.appendChild(frame);
   });
+}
+// Sizes wall-photos to whatever margin is ACTUALLY available beside .wrap
+// on this screen, rather than assuming a viewport width -- measuring wrong
+// is exactly what caused these to overlap slide text before: a fixed size
+// plus a fixed "wide enough" breakpoint doesn't hold across every real
+// laptop/monitor width. MAX_GAP must match the largest `gap` passed to any
+// addWallPhotos call, since every photo shares one --wall-photo-w.
+function sizeWallPhotos() {
+  const MAX_GAP = 28, BUFFER = 8, MIN_W = 50, MAX_W = 132;
+  const margin = (window.innerWidth - 1160) / 2;
+  const available = margin - MAX_GAP - BUFFER;
+  const show = available >= MIN_W;
+  if (show) document.documentElement.style.setProperty("--wall-photo-w", Math.min(MAX_W, available) + "px");
+  document.querySelectorAll(".wall-photo").forEach(p => { p.style.display = show ? "" : "none"; });
 }
 const svgns = "http://www.w3.org/2000/svg";
 const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -1277,10 +1304,10 @@ function render(data) {
   coverSection.appendChild(coverInner);
   buildCover(coverInner, data);
   addWallPhotos(coverSection, [
-    { src: "cover-2.jpg", top: "3%", side: "right", offset: "2.5%", rot: -6 },
-    { src: "cover-1.jpg", top: "26%", side: "right", offset: "4.5%", rot: 5 },
-    { src: "cover-3.jpg", top: "49%", side: "right", offset: "2%", rot: -4 },
-    { src: "cover-4.jpg", top: "72%", side: "right", offset: "5%", rot: 6 }
+    { src: "cover-2.jpg", top: "3%", side: "right", gap: 10, rot: -6 },
+    { src: "cover-1.jpg", top: "26%", side: "right", gap: 22, rot: 5 },
+    { src: "cover-3.jpg", top: "49%", side: "right", gap: 4, rot: -4 },
+    { src: "cover-4.jpg", top: "72%", side: "right", gap: 28, rot: 6 }
   ]);
 
   const introSection = el("section", "section alt reveal"); introSection.id = "intro";
@@ -1318,10 +1345,10 @@ function render(data) {
   const futureInner = el("div", "wrap"); futureSection.appendChild(futureInner);
   buildFuture(futureInner, data);
   addWallPhotos(futureSection, [
-    { src: "future-2.jpg", top: "6%", side: "left", offset: "2.5%", rot: 6 },
-    { src: "future-3.jpg", top: "52%", side: "left", offset: "4.5%", rot: -5 },
-    { src: "future-1.jpg", top: "12%", side: "right", offset: "2.5%", rot: -5 },
-    { src: "future-4.jpg", top: "58%", side: "right", offset: "4.5%", rot: 4 }
+    { src: "future-2.jpg", top: "6%", side: "left", gap: 10, rot: 6 },
+    { src: "future-3.jpg", top: "52%", side: "left", gap: 22, rot: -5 },
+    { src: "future-1.jpg", top: "12%", side: "right", gap: 10, rot: -5 },
+    { src: "future-4.jpg", top: "58%", side: "right", gap: 22, rot: 4 }
   ]);
 
   const conclusionSection = el("section", "section alt reveal"); conclusionSection.id = "conclusion";
@@ -1329,10 +1356,10 @@ function render(data) {
   const conclusionInner = el("div", "wrap"); conclusionSection.appendChild(conclusionInner);
   buildConclusion(conclusionInner, data);
   addWallPhotos(conclusionSection, [
-    { src: "conclusion-1.jpg", top: "3%", side: "right", offset: "2.5%", rot: 5 },
-    { src: "conclusion-2.jpg", top: "26%", side: "right", offset: "4.5%", rot: -6 },
-    { src: "conclusion-3.jpg", top: "49%", side: "right", offset: "2%", rot: 4 },
-    { src: "conclusion-4.jpg", top: "72%", side: "right", offset: "5%", rot: -5 }
+    { src: "conclusion-1.jpg", top: "3%", side: "right", gap: 10, rot: 5 },
+    { src: "conclusion-2.jpg", top: "26%", side: "right", gap: 22, rot: -6 },
+    { src: "conclusion-3.jpg", top: "49%", side: "right", gap: 4, rot: 4 },
+    { src: "conclusion-4.jpg", top: "72%", side: "right", gap: 28, rot: -5 }
   ]);
 
   const resourcesSection = el("section", "section reveal"); resourcesSection.id = "resources";
@@ -1476,6 +1503,8 @@ function initSlides() {
   const setHeaderH = () => document.documentElement.style.setProperty("--header-h", header.offsetHeight + "px");
   setHeaderH();
   window.addEventListener("resize", setHeaderH);
+  sizeWallPhotos();
+  window.addEventListener("resize", sizeWallPhotos);
   // Re-measure once more shortly after load: if a web font swaps in and
   // reflows the header after this first pass, every slide's height was
   // computed off the wrong number and stays wrong until the next resize.
