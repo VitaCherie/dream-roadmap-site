@@ -91,6 +91,7 @@
      silently break it entirely -- the Next button/nav links already land
      exactly on each section's top via scroll-margin-top, which is enough. */
   section.section {
+    position: relative;
     padding: 40px 0 92px;
     scroll-margin-top: var(--header-h, 64px);
     height: calc(100vh - var(--header-h, 64px));
@@ -110,6 +111,14 @@
   }
   section.section.alt { background: var(--surface-2); }
   section.section + section.section { border-top: 1px solid var(--border); }
+
+  /* Photos "pinned" in a slide's side margins, tilted slightly like they're
+     stuck to a wall. Only shown once there's enough room beside the
+     1160px-wide .wrap for them to sit in without ever overlapping content. */
+  .wall-photo { position: absolute; width: 132px; padding: 7px 7px 20px; background: #fff;
+    border-radius: 3px; box-shadow: var(--shadow); z-index: 1; }
+  .wall-photo img { display: block; width: 100%; height: 130px; object-fit: cover; border-radius: 1px; }
+  @media (max-width: 1360px) { .wall-photo { display: none; } }
 
   /* Fixed "Next" control -- advances to the next slide; on the conclusion
      slide it instead reveals the next ask before it starts moving slides. */
@@ -349,6 +358,21 @@
 <script>
 const el = (t, c, h) => { const e = document.createElement(t); if (c) e.className = c; if (h != null) e.innerHTML = h; return e; };
 const esc = s => (s || "").replace(/[&<>"]/g, m => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[m]));
+
+// Pins a few photos into a slide's side margins, tilted like they're stuck
+// to a wall. Positioned relative to the whole section (not .wrap) so they
+// sit outside the 1160px content column in the free space beside it --
+// the CSS hides them entirely once the viewport's too narrow for that.
+function addWallPhotos(section, photos) {
+  photos.forEach(p => {
+    const frame = el("div", "wall-photo");
+    frame.style.cssText = "top:" + p.top + ";" + p.side + ":" + p.offset + ";transform:rotate(" + p.rot + "deg);";
+    const img = el("img");
+    img.src = "photos/" + p.src; img.alt = "";
+    frame.appendChild(img);
+    section.appendChild(frame);
+  });
+}
 const svgns = "http://www.w3.org/2000/svg";
 const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -1252,6 +1276,10 @@ function render(data) {
   const coverInner = el("div", "wrap");
   coverSection.appendChild(coverInner);
   buildCover(coverInner, data);
+  addWallPhotos(coverSection, [
+    { src: "cover-2.jpg", top: "8%", side: "right", offset: "3%", rot: -6 },
+    { src: "cover-1.jpg", top: "54%", side: "left", offset: "3%", rot: 5 }
+  ]);
 
   const introSection = el("section", "section alt reveal"); introSection.id = "intro";
   app.appendChild(introSection);
@@ -1287,11 +1315,19 @@ function render(data) {
   app.appendChild(futureSection);
   const futureInner = el("div", "wrap"); futureSection.appendChild(futureInner);
   buildFuture(futureInner, data);
+  addWallPhotos(futureSection, [
+    { src: "future-2.jpg", top: "10%", side: "left", offset: "2.5%", rot: 6 },
+    { src: "future-1.jpg", top: "56%", side: "right", offset: "2.5%", rot: -5 }
+  ]);
 
   const conclusionSection = el("section", "section alt reveal"); conclusionSection.id = "conclusion";
   app.appendChild(conclusionSection);
   const conclusionInner = el("div", "wrap"); conclusionSection.appendChild(conclusionInner);
   buildConclusion(conclusionInner, data);
+  addWallPhotos(conclusionSection, [
+    { src: "conclusion-1.jpg", top: "9%", side: "right", offset: "3%", rot: 5 },
+    { src: "conclusion-2.jpg", top: "55%", side: "left", offset: "3%", rot: -6 }
+  ]);
 
   const resourcesSection = el("section", "section reveal"); resourcesSection.id = "resources";
   app.appendChild(resourcesSection);
