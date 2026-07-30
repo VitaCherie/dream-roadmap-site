@@ -1277,8 +1277,10 @@ function render(data) {
   coverSection.appendChild(coverInner);
   buildCover(coverInner, data);
   addWallPhotos(coverSection, [
-    { src: "cover-2.jpg", top: "8%", side: "right", offset: "3%", rot: -6 },
-    { src: "cover-1.jpg", top: "54%", side: "left", offset: "3%", rot: 5 }
+    { src: "cover-2.jpg", top: "3%", side: "right", offset: "2.5%", rot: -6 },
+    { src: "cover-1.jpg", top: "26%", side: "right", offset: "4.5%", rot: 5 },
+    { src: "cover-3.jpg", top: "49%", side: "right", offset: "2%", rot: -4 },
+    { src: "cover-4.jpg", top: "72%", side: "right", offset: "5%", rot: 6 }
   ]);
 
   const introSection = el("section", "section alt reveal"); introSection.id = "intro";
@@ -1316,8 +1318,10 @@ function render(data) {
   const futureInner = el("div", "wrap"); futureSection.appendChild(futureInner);
   buildFuture(futureInner, data);
   addWallPhotos(futureSection, [
-    { src: "future-2.jpg", top: "10%", side: "left", offset: "2.5%", rot: 6 },
-    { src: "future-1.jpg", top: "56%", side: "right", offset: "2.5%", rot: -5 }
+    { src: "future-2.jpg", top: "6%", side: "left", offset: "2.5%", rot: 6 },
+    { src: "future-3.jpg", top: "52%", side: "left", offset: "4.5%", rot: -5 },
+    { src: "future-1.jpg", top: "12%", side: "right", offset: "2.5%", rot: -5 },
+    { src: "future-4.jpg", top: "58%", side: "right", offset: "4.5%", rot: 4 }
   ]);
 
   const conclusionSection = el("section", "section alt reveal"); conclusionSection.id = "conclusion";
@@ -1325,8 +1329,10 @@ function render(data) {
   const conclusionInner = el("div", "wrap"); conclusionSection.appendChild(conclusionInner);
   buildConclusion(conclusionInner, data);
   addWallPhotos(conclusionSection, [
-    { src: "conclusion-1.jpg", top: "9%", side: "right", offset: "3%", rot: 5 },
-    { src: "conclusion-2.jpg", top: "55%", side: "left", offset: "3%", rot: -6 }
+    { src: "conclusion-1.jpg", top: "3%", side: "right", offset: "2.5%", rot: 5 },
+    { src: "conclusion-2.jpg", top: "26%", side: "right", offset: "4.5%", rot: -6 },
+    { src: "conclusion-3.jpg", top: "49%", side: "right", offset: "2%", rot: 4 },
+    { src: "conclusion-4.jpg", top: "72%", side: "right", offset: "5%", rot: -5 }
   ]);
 
   const resourcesSection = el("section", "section reveal"); resourcesSection.id = "resources";
