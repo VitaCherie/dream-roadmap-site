@@ -1266,8 +1266,8 @@ function render(data) {
   const nav = document.getElementById("siteNav");
   nav.hidden = false;
   nav.innerHTML = "";
-  [["Intro","#intro"],["Restructure","#restructure"],["Org structure","#orgchart"],["Roadmap","#roadmap"],["Resources","#resources"]].forEach(([label, href], i) => {
-    const a = el("a", "magnetic" + (i === 1 ? " active" : ""), label);
+  [["Cover","#cover"],["Intro","#intro"],["Restructure","#restructure"],["Org structure","#orgchart"],["Roadmap","#roadmap"],["Future","#future"],["Conclusion","#conclusion"],["Resources","#resources"]].forEach(([label, href], i) => {
+    const a = el("a", "magnetic" + (i === 0 ? " active" : ""), label);
     a.href = href;
     nav.appendChild(a);
   });
@@ -1353,7 +1353,7 @@ function initEffects() {
     statEls.forEach(animateCount);
   }
 
-  const sections = ["intro","restructure","orgchart","roadmap","resources"].map(id => document.getElementById(id)).filter(Boolean);
+  const sections = ["cover","intro","restructure","orgchart","roadmap","future","conclusion","resources"].map(id => document.getElementById(id)).filter(Boolean);
   const navLinks = Array.from(document.querySelectorAll("#siteNav a"));
   if (sections.length && navLinks.length && "IntersectionObserver" in window) {
     const spy = new IntersectionObserver((entries) => {
