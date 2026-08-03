@@ -37,6 +37,7 @@
     --accent-soft: #FFE3CC;
     --accent-dark: #E14E00;
     --wheel-dormant-fill: #E7EAEF;
+    --wheel-dormant-fill-light: #F1F3F6;
     --wheel-dormant-stroke: rgba(20,22,28,.5);
     --wheel-core-fill: #FFFFFF;
     --font-serif: Georgia, "Times New Roman", serif;
@@ -443,12 +444,14 @@ function renderWheelSVG(svgEl, data, mode) {
     svgEl.appendChild(defs);
   }
 
-  // pillar wedges -- same pale, neutral base in both modes (the static
-  // preview no longer tints each wedge in its own brand color; only the
-  // interactive wheel's progress-complete overlay adds color, as phases land)
+  // pillar wedges. The static preview keeps these a shade lighter than the
+  // Physical Spaces ring, so the two read as distinct tones -- the ring is
+  // the one constant, the outer wedges are the ones filling in with brand
+  // color as phases land, so it stays at --wheel-dormant-fill on the
+  // interactive wheel while the static preview uses a lighter variant.
   WEDGES.forEach(w => {
     const base = document.createElementNS(svgns,"path");
-    base.setAttribute("d", w.d); base.setAttribute("fill","var(--wheel-dormant-fill)"); base.setAttribute("stroke","var(--wheel-dormant-stroke)"); base.setAttribute("stroke-width","0.75");
+    base.setAttribute("d", w.d); base.setAttribute("fill", interactive ? "var(--wheel-dormant-fill)" : "var(--wheel-dormant-fill-light)"); base.setAttribute("stroke","var(--wheel-dormant-stroke)"); base.setAttribute("stroke-width","0.75");
     svgEl.appendChild(base);
   });
   if (interactive) {
