@@ -36,9 +36,8 @@
     --accent: #FF5B00;
     --accent-soft: #FFE3CC;
     --accent-dark: #E14E00;
-    --wheel-dormant-fill: #D8DEE6;
-    --wheel-dormant-stroke: rgba(20,22,28,.65);
-    --wheel-ring-fill: #C3C9D1;
+    --wheel-dormant-fill: #E7EAEF;
+    --wheel-dormant-stroke: rgba(20,22,28,.5);
     --wheel-core-fill: #FFFFFF;
     --font-serif: Georgia, "Times New Roman", serif;
     --font-sans: Calibri, Candara, Segoe, "Segoe UI", Optima, Arial, sans-serif;
@@ -376,16 +375,6 @@ const WEDGES = [
   {key:'portfolio', d:'M15,340 A325,325 0 0,1 340,15 L340,155 A185,185 0 0,0 155,340 Z', lx:340-PILLAR_OFFSET, ly:340-PILLAR_OFFSET}
 ];
 
-// The gap ring between the hub and the four pillars: Physical Spaces isn't
-// its own pillar, so instead of one wedge it fills all four quarters of the
-// gap equally, signalling "not yet consolidated, could sit under any of them".
-const SPACES_WEDGES = [
-  {d:'M340,155 A185,185 0 0,1 525,340 L480,340 A140,140 0 0,0 340,200 Z', lx:454.9, ly:225.1},
-  {d:'M525,340 A185,185 0 0,1 340,525 L340,480 A140,140 0 0,0 480,340 Z', lx:454.9, ly:454.9},
-  {d:'M340,525 A185,185 0 0,1 155,340 L200,340 A140,140 0 0,0 340,480 Z', lx:225.1, ly:454.9},
-  {d:'M155,340 A185,185 0 0,1 340,155 L340,200 A140,140 0 0,0 200,340 Z', lx:225.1, ly:225.1}
-];
-
 // Ramps from Dream's official secondary palette (Brand Guidelines, July 2026).
 // Media, Portfolio and the hub stay in the core Vivid Orange.
 const RAMPS = {
@@ -471,32 +460,42 @@ function renderWheelSVG(svgEl, data, mode) {
     });
   }
 
-  // Physical Spaces gap ring: static in both modes, never phase-driven.
-  // Just two labels total (not one pair per gap segment) -- "Physical"
-  // running vertically down the left side of the ring, "Spaces" down the
-  // right, each a single word reading top-to-bottom along the ring itself.
-  SPACES_WEDGES.forEach(w => {
-    const seg = document.createElementNS(svgns,"path");
-    seg.setAttribute("d", w.d); seg.setAttribute("fill","var(--wheel-dormant-fill)"); seg.setAttribute("stroke","var(--wheel-dormant-stroke)"); seg.setAttribute("stroke-width","0.5");
-    svgEl.appendChild(seg);
-  });
+  // Physical Spaces gap ring: static in both modes, never phase-driven. One
+  // plain, undivided ring (the hub circle drawn later covers its inner
+  // portion) -- the quarter lines belong to the pillar wedges outside it and
+  // must stop at its outer edge, never crossing through the ring itself.
+  const spacesRing = document.createElementNS(svgns,"circle");
+  spacesRing.setAttribute("cx","340"); spacesRing.setAttribute("cy","340"); spacesRing.setAttribute("r", PILLAR_INNER_R);
+  spacesRing.setAttribute("fill","var(--wheel-dormant-fill)"); spacesRing.setAttribute("stroke","var(--wheel-dormant-stroke)"); spacesRing.setAttribute("stroke-width","0.75");
+  svgEl.appendChild(spacesRing);
+  // Curved along the ring's own circumference (matching Portfolio's arc
+  // treatment below), not straight vertical text -- "Physical" following
+  // the left side of the ring, "Spaces" the right.
+  const spacesDefs = document.createElementNS(svgns,"defs");
+  svgEl.appendChild(spacesDefs);
   const SPACES_RING_R = (PILLAR_INNER_R + 140) / 2;
-  [["Physical", 180], ["Spaces", 0]].forEach(([txt, angleDeg]) => {
-    const rad = angleDeg * Math.PI / 180;
-    const x = 340 + SPACES_RING_R * Math.cos(rad);
-    const y = 340 + SPACES_RING_R * Math.sin(rad);
+  [["Physical", 180, "st-sp-l"], ["Spaces", 0, "st-sp-r"]].forEach(([txt, centerDeg, arcId]) => {
+    const a0 = (centerDeg - 30) * Math.PI/180, a1 = (centerDeg + 30) * Math.PI/180;
+    const x0 = 340 + SPACES_RING_R*Math.cos(a0), y0 = 340 + SPACES_RING_R*Math.sin(a0);
+    const x1 = 340 + SPACES_RING_R*Math.cos(a1), y1 = 340 + SPACES_RING_R*Math.sin(a1);
+    const uid = (interactive?"rm-":"st-") + arcId;
+    const arcPath = document.createElementNS(svgns,"path");
+    arcPath.setAttribute("id", uid);
+    arcPath.setAttribute("d", `M${x0},${y0} A${SPACES_RING_R},${SPACES_RING_R} 0 0,1 ${x1},${y1}`);
+    arcPath.setAttribute("fill","none");
+    spacesDefs.appendChild(arcPath);
     const t = document.createElementNS(svgns,"text");
-    t.setAttribute("x", x); t.setAttribute("y", y);
-    t.setAttribute("text-anchor","middle"); t.setAttribute("dominant-baseline","central");
-    t.setAttribute("transform", `rotate(90 ${x} ${y})`);
     t.style.cssText = "font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;font-family:var(--font-wheel);fill:var(--text-muted)";
-    t.textContent = txt;
+    const tp = document.createElementNS(svgns,"textPath");
+    tp.setAttributeNS("http://www.w3.org/1999/xlink","href","#"+uid);
+    tp.setAttribute("startOffset","50%"); tp.setAttribute("text-anchor","middle");
+    tp.textContent = txt;
+    t.appendChild(tp);
     svgEl.appendChild(t);
   });
 
-  // hub circle: plain white while collapsed (just the App logo, nothing
-  // else to see); switches to the pale ring tone once expanded, so the
-  // Internal Resources / Partnerships detail below reads against it.
+  // hub circle: always plain white -- collapsing/expanding only changes
+  // what's visible inside it, never its color.
   const hubGroup = document.createElementNS(svgns,"g");
   hubGroup.style.cursor = "pointer";
   svgEl.appendChild(hubGroup);
@@ -515,56 +514,64 @@ function renderWheelSVG(svgEl, data, mode) {
     hubGroup.appendChild(hubOv);
   }
 
-  // top half of the hub: Dream App, large and the clear visual anchor.
-  // Fixed position/size, solved the same way as the pillar logos: at
-  // HUB_LOGO_H=60 with its top edge at y=235, the box's top corner sits
-  // ~12px inside the hub circle's r=140 rim (rather than just checking the
-  // logo's center point, which is what let it poke out before).
-  // Static mode (the restructure preview) leaves this half empty -- the
-  // animated "hub" chip supplies the logo + "App" tag there instead, so we
-  // never draw the same logo twice in the same spot.
+  // The App logo + toggle sit in a group that shifts down to sit dead
+  // centre in the circle while collapsed (nothing below it yet), then
+  // slides back up to its top-of-circle position when the detail below
+  // is revealed -- rather than the logo staying fixed and the hub just
+  // feeling empty underneath it at rest.
   const hd = heightBox(LOGO_ASPECT.hub, HUB_LOGO_H);
   const hubLogoTop = 235, hubLogoBottom = hubLogoTop + HUB_LOGO_H;
+  const COLLAPSE_SHIFT = 40;
+  const hubLogoGroup = document.createElementNS(svgns,"g");
+  hubLogoGroup.style.cssText = "transform:translateY(" + COLLAPSE_SHIFT + "px);transition:transform .35s var(--ease)";
+  hubGroup.appendChild(hubLogoGroup);
   if (interactive) {
     const hubImg = document.createElementNS(svgns,"image");
     hubImg.setAttribute("href","logos/"+data.hub.logo); hubImg.setAttributeNS("http://www.w3.org/1999/xlink","href","logos/"+data.hub.logo);
     hubImg.setAttribute("x", 340-hd.w/2); hubImg.setAttribute("y", hubLogoTop);
     hubImg.setAttribute("width", hd.w); hubImg.setAttribute("height", hd.h);
     hubImg.setAttribute("id","hub-title");
-    hubGroup.appendChild(hubImg);
+    hubLogoGroup.appendChild(hubImg);
     const hubAppTag = document.createElementNS(svgns,"text");
     hubAppTag.setAttribute("x","340"); hubAppTag.setAttribute("y", hubLogoBottom + 14);
     hubAppTag.setAttribute("text-anchor","middle"); hubAppTag.setAttribute("dominant-baseline","central");
     hubAppTag.style.cssText = "font-size:14px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;font-family:var(--font-wheel);fill:var(--accent-dark)";
     hubAppTag.textContent = "App";
-    hubGroup.appendChild(hubAppTag);
+    hubLogoGroup.appendChild(hubAppTag);
     const hubSub = document.createElementNS(svgns,"text");
     hubSub.setAttribute("id","hub-sub");
     hubSub.setAttribute("x","340"); hubSub.setAttribute("y", hubLogoBottom + 29);
     hubSub.setAttribute("text-anchor","middle"); hubSub.setAttribute("dominant-baseline","central");
     hubSub.style.cssText = "font-size:9px;font-family:var(--font-wheel);fill:var(--text-secondary)";
     hubSub.textContent = data.hub.subBefore;
-    hubGroup.appendChild(hubSub);
+    hubLogoGroup.appendChild(hubSub);
   }
 
-  // Internal Resources / Partnerships detail -- collapsed by default so the
-  // hub reads as just "Dream App" at rest; a small toggle beneath the logo
-  // reveals the two columns (and the ring tone behind them) on click.
+  // Small round chevron toggle -- travels with the logo group so it always
+  // sits just beneath it, collapsed or expanded.
+  const hubToggleBtn = document.createElementNS(svgns,"g");
+  hubToggleBtn.setAttribute("id", (interactive ? "roadmap" : "restructure") + "-hub-toggle-btn");
+  hubToggleBtn.style.cursor = "pointer";
+  const toggleCircle = document.createElementNS(svgns,"circle");
+  toggleCircle.setAttribute("cx","340"); toggleCircle.setAttribute("cy","340"); toggleCircle.setAttribute("r","12");
+  toggleCircle.setAttribute("fill","var(--wheel-core-fill)"); toggleCircle.setAttribute("stroke","var(--wheel-dormant-stroke)"); toggleCircle.setAttribute("stroke-width","1");
+  hubToggleBtn.appendChild(toggleCircle);
+  const chevron = document.createElementNS(svgns,"path");
+  chevron.setAttribute("d","M334,336 L340,342 L346,336");
+  chevron.setAttribute("fill","none"); chevron.setAttribute("stroke","var(--text-secondary)"); chevron.setAttribute("stroke-width","1.6");
+  chevron.setAttribute("stroke-linecap","round"); chevron.setAttribute("stroke-linejoin","round");
+  chevron.style.cssText = "transform-origin:340px 340px;transition:transform .3s var(--ease)";
+  hubToggleBtn.appendChild(chevron);
+  hubLogoGroup.appendChild(hubToggleBtn);
+
+  // Internal Resources / Partnerships detail -- collapsed by default, no
+  // dividing lines (the quarter lines already stop at the ring around this
+  // circle; nothing should then cut back across the white core itself).
   const hubDetail = document.createElementNS(svgns,"g");
   hubDetail.setAttribute("id", (interactive ? "roadmap" : "restructure") + "-hub-detail");
   hubDetail.style.cssText = "opacity:0;pointer-events:none;transition:opacity .3s";
   hubGroup.appendChild(hubDetail);
 
-  const hubDivider = document.createElementNS(svgns,"line");
-  hubDivider.setAttribute("x1","200"); hubDivider.setAttribute("y1","340"); hubDivider.setAttribute("x2","480"); hubDivider.setAttribute("y2","340");
-  hubDivider.setAttribute("stroke","var(--wheel-dormant-stroke)"); hubDivider.setAttribute("stroke-width","1");
-  hubDetail.appendChild(hubDivider);
-  const colDivider = document.createElementNS(svgns,"line");
-  colDivider.setAttribute("x1","340"); colDivider.setAttribute("y1","350"); colDivider.setAttribute("x2","340"); colDivider.setAttribute("y2","422");
-  colDivider.setAttribute("stroke","var(--wheel-dormant-stroke)"); colDivider.setAttribute("stroke-width","0.75");
-  hubDetail.appendChild(colDivider);
-
-  // bottom half, left column: Internal Resources (reuses the org chart's shared-resources list)
   const colTitle = (x, label) => {
     const t = document.createElementNS(svgns,"text");
     t.setAttribute("x", x); t.setAttribute("y", "358");
@@ -583,47 +590,19 @@ function renderWheelSVG(svgEl, data, mode) {
     hubDetail.appendChild(t);
   });
 
-  // bottom half, right column: Partnerships Engine, with Dream Ventures underneath.
-  // Centered on 410 (the true midpoint of the 340-480 half, mirroring the
-  // left column's 270) -- it was sitting at 420, which pushed the long
-  // "invests in outside startups" line past the hub circle's right edge.
+  // Right column: Partnerships Engine, with the Dream Ventures logo underneath.
   colTitle(410, "Partnerships Engine");
   const venturesImg = document.createElementNS(svgns,"image");
   const ventDims = { w: 74, h: 74 / (240/118) };
   venturesImg.setAttribute("href","logos/dream-ventures.png"); venturesImg.setAttributeNS("http://www.w3.org/1999/xlink","href","logos/dream-ventures.png");
-  venturesImg.setAttribute("x", 410 - ventDims.w/2); venturesImg.setAttribute("y", 373);
+  venturesImg.setAttribute("x", 410 - ventDims.w/2); venturesImg.setAttribute("y", 378);
   venturesImg.setAttribute("width", ventDims.w); venturesImg.setAttribute("height", ventDims.h);
   hubDetail.appendChild(venturesImg);
-  const venturesSub = document.createElementNS(svgns,"text");
-  venturesSub.setAttribute("x","410"); venturesSub.setAttribute("y", 373 + ventDims.h + 8);
-  venturesSub.setAttribute("text-anchor","middle"); venturesSub.setAttribute("dominant-baseline","central");
-  venturesSub.style.cssText = "font-size:7.5px;font-family:var(--font-wheel);fill:var(--text-secondary)";
-  venturesSub.textContent = "invests in outside startups";
-  hubDetail.appendChild(venturesSub);
-
-  // Small round chevron toggle, sitting right on the divider line -- the
-  // only "tap to expand" affordance, deliberately tiny so the hub reads as
-  // just the App logo at rest instead of a paragraph of instructions.
-  const hubToggleBtn = document.createElementNS(svgns,"g");
-  hubToggleBtn.setAttribute("id", (interactive ? "roadmap" : "restructure") + "-hub-toggle-btn");
-  hubToggleBtn.style.cursor = "pointer";
-  const toggleCircle = document.createElementNS(svgns,"circle");
-  toggleCircle.setAttribute("cx","340"); toggleCircle.setAttribute("cy","340"); toggleCircle.setAttribute("r","12");
-  toggleCircle.setAttribute("fill","var(--wheel-core-fill)"); toggleCircle.setAttribute("stroke","var(--wheel-dormant-stroke)"); toggleCircle.setAttribute("stroke-width","1");
-  hubToggleBtn.appendChild(toggleCircle);
-  const chevron = document.createElementNS(svgns,"path");
-  chevron.setAttribute("id", (interactive ? "roadmap" : "restructure") + "-hub-chevron");
-  chevron.setAttribute("d","M334,336 L340,342 L346,336");
-  chevron.setAttribute("fill","none"); chevron.setAttribute("stroke","var(--text-secondary)"); chevron.setAttribute("stroke-width","1.6");
-  chevron.setAttribute("stroke-linecap","round"); chevron.setAttribute("stroke-linejoin","round");
-  chevron.style.cssText = "transform-origin:340px 340px;transition:transform .3s var(--ease)";
-  hubToggleBtn.appendChild(chevron);
-  hubGroup.appendChild(hubToggleBtn);
 
   let hubExpanded = false;
   hubGroup.addEventListener("click", () => {
     hubExpanded = !hubExpanded;
-    hubBase.setAttribute("fill", hubExpanded ? "var(--wheel-ring-fill)" : "var(--wheel-core-fill)");
+    hubLogoGroup.style.transform = hubExpanded ? "translateY(0px)" : "translateY(" + COLLAPSE_SHIFT + "px)";
     hubDetail.style.opacity = hubExpanded ? "1" : "0";
     hubDetail.style.pointerEvents = hubExpanded ? "auto" : "none";
     chevron.style.transform = hubExpanded ? "rotate(180deg)" : "rotate(0deg)";
