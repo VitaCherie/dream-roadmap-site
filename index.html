@@ -745,14 +745,20 @@ function buildWheel(container, data) {
   heading.appendChild(el("span", "dh-chevron", "&#9660;"));
   listCol.appendChild(heading);
   const msPanel = el("div"); msPanel.id = "msPanel";
+  const msWrap = el("div");
   const msPanelInner = el("div");
-  msPanel.appendChild(msPanelInner);
+  msWrap.appendChild(msPanelInner);
+  msPanel.appendChild(msWrap);
   listCol.appendChild(msPanel);
   heading.addEventListener("click", () => {
     heading.classList.toggle("collapsed");
     msPanel.classList.toggle("collapsed");
   });
 
+  // A sibling of msPanelInner (not nested inside it) so rewriting the
+  // deliverables list each phase doesn't wipe this out, but still inside
+  // the same collapsible wrapper -- collapsing "Core deliverables" hides
+  // this along with it, instead of leaving it stranded outside the toggle.
   const cn = el("div","coming-next");
   cn.id = "comingNext";
   cn.style.display = "none";
@@ -760,7 +766,7 @@ function buildWheel(container, data) {
   const ul = el("ul");
   data.comingNext.forEach(item => ul.appendChild(el("li", null, esc(item))));
   cn.appendChild(ul);
-  listCol.appendChild(cn);
+  msWrap.appendChild(cn);
 
   function setSector(key, state, ramp) {
     const ov = document.getElementById("ov-"+key);
