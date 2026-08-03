@@ -471,19 +471,27 @@ function renderWheelSVG(svgEl, data, mode) {
     });
   }
 
-  // Physical Spaces gap ring: static in both modes, never phase-driven
+  // Physical Spaces gap ring: static in both modes, never phase-driven.
+  // Just two labels total (not one pair per gap segment) -- "Physical"
+  // running vertically down the left side of the ring, "Spaces" down the
+  // right, each a single word reading top-to-bottom along the ring itself.
   SPACES_WEDGES.forEach(w => {
     const seg = document.createElementNS(svgns,"path");
     seg.setAttribute("d", w.d); seg.setAttribute("fill","var(--wheel-dormant-fill)"); seg.setAttribute("stroke","var(--wheel-dormant-stroke)"); seg.setAttribute("stroke-width","0.5");
     svgEl.appendChild(seg);
-    [["Physical", w.ly-5], ["Spaces", w.ly+9]].forEach(([txt,y]) => {
-      const t = document.createElementNS(svgns,"text");
-      t.setAttribute("x", w.lx); t.setAttribute("y", y);
-      t.setAttribute("text-anchor","middle"); t.setAttribute("dominant-baseline","central");
-      t.style.cssText = "font-size:10px;font-weight:700;font-family:var(--font-wheel);fill:var(--text-muted)";
-      t.textContent = txt;
-      svgEl.appendChild(t);
-    });
+  });
+  const SPACES_RING_R = (PILLAR_INNER_R + 140) / 2;
+  [["Physical", 180], ["Spaces", 0]].forEach(([txt, angleDeg]) => {
+    const rad = angleDeg * Math.PI / 180;
+    const x = 340 + SPACES_RING_R * Math.cos(rad);
+    const y = 340 + SPACES_RING_R * Math.sin(rad);
+    const t = document.createElementNS(svgns,"text");
+    t.setAttribute("x", x); t.setAttribute("y", y);
+    t.setAttribute("text-anchor","middle"); t.setAttribute("dominant-baseline","central");
+    t.setAttribute("transform", `rotate(90 ${x} ${y})`);
+    t.style.cssText = "font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;font-family:var(--font-wheel);fill:var(--text-muted)";
+    t.textContent = txt;
+    svgEl.appendChild(t);
   });
 
   // hub circle: plain white while collapsed (just the App logo, nothing
@@ -580,27 +588,37 @@ function renderWheelSVG(svgEl, data, mode) {
   // left column's 270) -- it was sitting at 420, which pushed the long
   // "invests in outside startups" line past the hub circle's right edge.
   colTitle(410, "Partnerships Engine");
-  const venturesTitle = document.createElementNS(svgns,"text");
-  venturesTitle.setAttribute("x","410"); venturesTitle.setAttribute("y","382");
-  venturesTitle.setAttribute("text-anchor","middle"); venturesTitle.setAttribute("dominant-baseline","central");
-  venturesTitle.style.cssText = "font-size:11px;font-weight:700;font-style:italic;font-family:var(--font-wheel);fill:var(--text-primary)";
-  venturesTitle.textContent = "Dream Ventures";
-  hubDetail.appendChild(venturesTitle);
+  const venturesImg = document.createElementNS(svgns,"image");
+  const ventDims = { w: 74, h: 74 / (240/118) };
+  venturesImg.setAttribute("href","logos/dream-ventures.png"); venturesImg.setAttributeNS("http://www.w3.org/1999/xlink","href","logos/dream-ventures.png");
+  venturesImg.setAttribute("x", 410 - ventDims.w/2); venturesImg.setAttribute("y", 373);
+  venturesImg.setAttribute("width", ventDims.w); venturesImg.setAttribute("height", ventDims.h);
+  hubDetail.appendChild(venturesImg);
   const venturesSub = document.createElementNS(svgns,"text");
-  venturesSub.setAttribute("x","410"); venturesSub.setAttribute("y","396");
+  venturesSub.setAttribute("x","410"); venturesSub.setAttribute("y", 373 + ventDims.h + 8);
   venturesSub.setAttribute("text-anchor","middle"); venturesSub.setAttribute("dominant-baseline","central");
   venturesSub.style.cssText = "font-size:7.5px;font-family:var(--font-wheel);fill:var(--text-secondary)";
   venturesSub.textContent = "invests in outside startups";
   hubDetail.appendChild(venturesSub);
 
-  // Small "tap to expand" affordance, sitting just under the App logo/tag.
-  const hubToggleHint = document.createElementNS(svgns,"text");
-  hubToggleHint.setAttribute("id", (interactive ? "roadmap" : "restructure") + "-hub-toggle-hint");
-  hubToggleHint.setAttribute("x","340"); hubToggleHint.setAttribute("y", interactive ? hubLogoBottom + 46 : 300);
-  hubToggleHint.setAttribute("text-anchor","middle"); hubToggleHint.setAttribute("dominant-baseline","central");
-  hubToggleHint.style.cssText = "font-size:9px;font-weight:700;letter-spacing:.4px;font-family:var(--font-wheel);fill:var(--text-muted)";
-  hubToggleHint.textContent = "+ Internal resources & partnerships";
-  hubGroup.appendChild(hubToggleHint);
+  // Small round chevron toggle, sitting right on the divider line -- the
+  // only "tap to expand" affordance, deliberately tiny so the hub reads as
+  // just the App logo at rest instead of a paragraph of instructions.
+  const hubToggleBtn = document.createElementNS(svgns,"g");
+  hubToggleBtn.setAttribute("id", (interactive ? "roadmap" : "restructure") + "-hub-toggle-btn");
+  hubToggleBtn.style.cursor = "pointer";
+  const toggleCircle = document.createElementNS(svgns,"circle");
+  toggleCircle.setAttribute("cx","340"); toggleCircle.setAttribute("cy","340"); toggleCircle.setAttribute("r","12");
+  toggleCircle.setAttribute("fill","var(--wheel-core-fill)"); toggleCircle.setAttribute("stroke","var(--wheel-dormant-stroke)"); toggleCircle.setAttribute("stroke-width","1");
+  hubToggleBtn.appendChild(toggleCircle);
+  const chevron = document.createElementNS(svgns,"path");
+  chevron.setAttribute("id", (interactive ? "roadmap" : "restructure") + "-hub-chevron");
+  chevron.setAttribute("d","M334,336 L340,342 L346,336");
+  chevron.setAttribute("fill","none"); chevron.setAttribute("stroke","var(--text-secondary)"); chevron.setAttribute("stroke-width","1.6");
+  chevron.setAttribute("stroke-linecap","round"); chevron.setAttribute("stroke-linejoin","round");
+  chevron.style.cssText = "transform-origin:340px 340px;transition:transform .3s var(--ease)";
+  hubToggleBtn.appendChild(chevron);
+  hubGroup.appendChild(hubToggleBtn);
 
   let hubExpanded = false;
   hubGroup.addEventListener("click", () => {
@@ -608,15 +626,42 @@ function renderWheelSVG(svgEl, data, mode) {
     hubBase.setAttribute("fill", hubExpanded ? "var(--wheel-ring-fill)" : "var(--wheel-core-fill)");
     hubDetail.style.opacity = hubExpanded ? "1" : "0";
     hubDetail.style.pointerEvents = hubExpanded ? "auto" : "none";
-    hubToggleHint.textContent = hubExpanded ? "− Hide detail" : "+ Internal resources & partnerships";
+    chevron.style.transform = hubExpanded ? "rotate(180deg)" : "rotate(0deg)";
   });
 
   // The four pillar logos, every one drawn at the same fixed height
   // (PILLAR_LOGO_H) so none reads bigger or smaller than another. Static
   // mode (the restructure preview) skips these -- the scattered/new chips
   // supply the pillar logos there instead, at these exact same points.
-  // Portfolio's caption ("Portfolio") sits ABOVE its logo, like a label --
-  // the logo itself (DreamBrew) shifts down slightly to make room.
+  // Portfolio's caption ("Portfolio") curves along its wedge's outer rim
+  // instead of sitting as a straight label -- the one wedge without its own
+  // single-brand logo gets the more editorial, "category" treatment.
+  const WEDGE_ANGLES = { tools: [-90,0], media: [0,90], funding: [90,180], portfolio: [180,270] };
+  let arcDefs = null;
+  WEDGES.forEach(w => {
+    const div = data.divisions[w.key];
+    if (!div.sub) return;
+    if (!arcDefs) { arcDefs = document.createElementNS(svgns,"defs"); svgEl.appendChild(arcDefs); }
+    const [a0, a1] = WEDGE_ANGLES[w.key];
+    const inset = 18, r = 300;
+    const rad0 = (a0+inset) * Math.PI/180, rad1 = (a1-inset) * Math.PI/180;
+    const x0 = 340 + r*Math.cos(rad0), y0 = 340 + r*Math.sin(rad0);
+    const x1 = 340 + r*Math.cos(rad1), y1 = 340 + r*Math.sin(rad1);
+    const arcPath = document.createElementNS(svgns,"path");
+    arcPath.setAttribute("id", (interactive?"rm-":"st-")+w.key+"-label-arc");
+    arcPath.setAttribute("d", `M${x0},${y0} A${r},${r} 0 0,1 ${x1},${y1}`);
+    arcPath.setAttribute("fill","none");
+    arcDefs.appendChild(arcPath);
+    const arcText = document.createElementNS(svgns,"text");
+    if (interactive) arcText.setAttribute("id", w.key+"-sub");
+    arcText.style.cssText = "font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;font-family:var(--font-wheel);fill:var(--text-secondary)";
+    const textPath = document.createElementNS(svgns,"textPath");
+    textPath.setAttributeNS("http://www.w3.org/1999/xlink","href","#"+(interactive?"rm-":"st-")+w.key+"-label-arc");
+    textPath.setAttribute("startOffset","50%"); textPath.setAttribute("text-anchor","middle");
+    textPath.textContent = div.sub;
+    arcText.appendChild(textPath);
+    svgEl.appendChild(arcText);
+  });
   if (interactive) {
     WEDGES.forEach(w => {
       const div = data.divisions[w.key];
@@ -629,13 +674,16 @@ function renderWheelSVG(svgEl, data, mode) {
       img.setAttribute("width", dims.w); img.setAttribute("height", dims.h);
       img.setAttribute("id", w.key+"-title");
       svgEl.appendChild(img);
-      const sub = document.createElementNS(svgns,"text");
-      sub.setAttribute("id", w.key+"-sub");
-      sub.setAttribute("x", w.lx); sub.setAttribute("y", logoCenterY - dims.h/2 - 12);
-      sub.setAttribute("text-anchor","middle"); sub.setAttribute("dominant-baseline","central");
-      sub.style.cssText = "font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;font-family:var(--font-wheel);fill:var(--text-secondary)";
-      sub.textContent = div.sub || "";
-      svgEl.appendChild(sub);
+      if (!hasSub) {
+        // No caption for this wedge -- still needs a "-sub" element for
+        // setSector()'s color updates to target, just with nothing to show.
+        const sub = document.createElementNS(svgns,"text");
+        sub.setAttribute("id", w.key+"-sub");
+        sub.setAttribute("x", w.lx); sub.setAttribute("y", logoCenterY - dims.h/2 - 12);
+        sub.setAttribute("text-anchor","middle"); sub.setAttribute("dominant-baseline","central");
+        sub.style.cssText = "font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;font-family:var(--font-wheel);fill:var(--text-secondary)";
+        svgEl.appendChild(sub);
+      }
     });
   }
 }
@@ -863,7 +911,6 @@ function buildRestructure(container, data) {
     const content = makeChipContent(item.label, item.logo, item.key === "hub");
     chip.appendChild(content);
     pos.appendChild(chip);
-    if (item.key === "portfolio") pos.appendChild(el("div", "chip-tag above", "Portfolio"));
     if (item.key === "hub") pos.appendChild(el("div", "chip-tag", "App"));
     stage.appendChild(pos);
     chipEls[item.key] = { pos, chip, content };
