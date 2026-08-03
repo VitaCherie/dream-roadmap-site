@@ -9,6 +9,7 @@
 <meta name="theme-color" content="#FFFFFF" />
 <link rel="manifest" href="manifest.json" />
 <link rel="apple-touch-icon" href="icon-192.png" />
+<link rel="stylesheet" href="https://use.typekit.net/rja6jyr.css">
 <title>Dream: Restructure &amp; Roadmap</title>
 <style>
   /*
@@ -35,10 +36,13 @@
     --accent: #FF5B00;
     --accent-soft: #FFE3CC;
     --accent-dark: #E14E00;
-    --wheel-dormant-fill: #ECECEC;
-    --wheel-dormant-stroke: rgba(66,45,35,.24);
+    --wheel-dormant-fill: #D8DEE6;
+    --wheel-dormant-stroke: rgba(20,22,28,.65);
+    --wheel-ring-fill: #C3C9D1;
+    --wheel-core-fill: #FFFFFF;
     --font-serif: Georgia, "Times New Roman", serif;
     --font-sans: Calibri, Candara, Segoe, "Segoe UI", Optima, Arial, sans-serif;
+    --font-wheel: "richmond-display", Georgia, serif;
     --shadow: 3px 3px 0 rgba(66,45,35,0.08);
     --ease: cubic-bezier(.22,1,.36,1);
   }
@@ -222,7 +226,7 @@
   .stage.restructured .chip { animation: none; }
   @keyframes chipFloat { 0%, 100% { transform: translateY(0) rotate(var(--rot, 0deg)); } 50% { transform: translateY(-8px) rotate(var(--rot, 0deg)); } }
   .chip-logo { width: 100%; height: 100%; object-fit: contain; display: block; }
-  .chip-wordmark { font-family: var(--font-serif); font-style: italic; font-weight: 700; font-size: 13.5px; color: var(--text-primary); white-space: nowrap; }
+  .chip-wordmark { font-family: var(--font-wheel); font-style: italic; font-weight: 700; font-size: 13.5px; color: var(--text-primary); white-space: nowrap; }
   .chip-tag { position: absolute; top: 100%; left: 50%; transform: translateX(-50%); margin-top: 5px; font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; color: var(--accent-dark); background: var(--accent-soft); padding: 2px 8px; border-radius: 20px; white-space: nowrap; opacity: 0; transition: opacity .4s ease; }
   .chip-tag.above { top: auto; bottom: 100%; margin-top: 0; margin-bottom: 5px; }
   .stage.restructured .chip-tag { opacity: 1; transition: opacity .5s ease 1.05s; }
@@ -450,18 +454,13 @@ function renderWheelSVG(svgEl, data, mode) {
     svgEl.appendChild(defs);
   }
 
-  // pillar wedges
+  // pillar wedges -- same pale, neutral base in both modes (the static
+  // preview no longer tints each wedge in its own brand color; only the
+  // interactive wheel's progress-complete overlay adds color, as phases land)
   WEDGES.forEach(w => {
-    if (interactive) {
-      const base = document.createElementNS(svgns,"path");
-      base.setAttribute("d", w.d); base.setAttribute("fill","var(--wheel-dormant-fill)"); base.setAttribute("stroke","var(--wheel-dormant-stroke)"); base.setAttribute("stroke-width","0.5");
-      svgEl.appendChild(base);
-    } else {
-      const p = document.createElementNS(svgns,"path");
-      const ramp = RAMPS[data.divisions[w.key].style];
-      p.setAttribute("d", w.d); p.setAttribute("fill", ramp.fill); p.setAttribute("stroke", ramp.stroke); p.setAttribute("stroke-width","1");
-      svgEl.appendChild(p);
-    }
+    const base = document.createElementNS(svgns,"path");
+    base.setAttribute("d", w.d); base.setAttribute("fill","var(--wheel-dormant-fill)"); base.setAttribute("stroke","var(--wheel-dormant-stroke)"); base.setAttribute("stroke-width","0.75");
+    svgEl.appendChild(base);
   });
   if (interactive) {
     WEDGES.forEach(w => {
@@ -481,25 +480,31 @@ function renderWheelSVG(svgEl, data, mode) {
       const t = document.createElementNS(svgns,"text");
       t.setAttribute("x", w.lx); t.setAttribute("y", y);
       t.setAttribute("text-anchor","middle"); t.setAttribute("dominant-baseline","central");
-      t.style.cssText = "font-size:10px;font-weight:700;font-family:var(--font-sans);fill:var(--text-muted)";
+      t.style.cssText = "font-size:10px;font-weight:700;font-family:var(--font-wheel);fill:var(--text-muted)";
       t.textContent = txt;
       svgEl.appendChild(t);
     });
   });
 
-  // hub circle
+  // hub circle: plain white while collapsed (just the App logo, nothing
+  // else to see); switches to the pale ring tone once expanded, so the
+  // Internal Resources / Partnerships detail below reads against it.
+  const hubGroup = document.createElementNS(svgns,"g");
+  hubGroup.style.cursor = "pointer";
+  svgEl.appendChild(hubGroup);
+
   const hubBase = document.createElementNS(svgns,"circle");
   hubBase.setAttribute("cx","340"); hubBase.setAttribute("cy","340"); hubBase.setAttribute("r","140");
-  hubBase.setAttribute("fill", interactive ? "var(--wheel-dormant-fill)" : RAMPS.accent.fill);
-  hubBase.setAttribute("stroke", interactive ? "var(--wheel-dormant-stroke)" : RAMPS.accent.stroke);
-  hubBase.setAttribute("stroke-width", interactive ? "0.5" : "1");
-  svgEl.appendChild(hubBase);
+  hubBase.setAttribute("fill", "var(--wheel-core-fill)");
+  hubBase.setAttribute("stroke", "var(--wheel-dormant-stroke)");
+  hubBase.setAttribute("stroke-width", "0.75");
+  hubGroup.appendChild(hubBase);
   if (interactive) {
     const hubOv = document.createElementNS(svgns,"circle");
     hubOv.setAttribute("id","ov-hub"); hubOv.setAttribute("cx","340"); hubOv.setAttribute("cy","340"); hubOv.setAttribute("r","140");
     hubOv.setAttribute("fill","none"); hubOv.setAttribute("stroke","none");
     hubOv.style.cssText = "opacity:0;transition:opacity .4s";
-    svgEl.appendChild(hubOv);
+    hubGroup.appendChild(hubOv);
   }
 
   // top half of the hub: Dream App, large and the clear visual anchor.
@@ -518,49 +523,56 @@ function renderWheelSVG(svgEl, data, mode) {
     hubImg.setAttribute("x", 340-hd.w/2); hubImg.setAttribute("y", hubLogoTop);
     hubImg.setAttribute("width", hd.w); hubImg.setAttribute("height", hd.h);
     hubImg.setAttribute("id","hub-title");
-    svgEl.appendChild(hubImg);
+    hubGroup.appendChild(hubImg);
     const hubAppTag = document.createElementNS(svgns,"text");
     hubAppTag.setAttribute("x","340"); hubAppTag.setAttribute("y", hubLogoBottom + 14);
     hubAppTag.setAttribute("text-anchor","middle"); hubAppTag.setAttribute("dominant-baseline","central");
-    hubAppTag.style.cssText = "font-size:14px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;font-family:var(--font-sans);fill:var(--accent-dark)";
+    hubAppTag.style.cssText = "font-size:14px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;font-family:var(--font-wheel);fill:var(--accent-dark)";
     hubAppTag.textContent = "App";
-    svgEl.appendChild(hubAppTag);
+    hubGroup.appendChild(hubAppTag);
     const hubSub = document.createElementNS(svgns,"text");
     hubSub.setAttribute("id","hub-sub");
     hubSub.setAttribute("x","340"); hubSub.setAttribute("y", hubLogoBottom + 29);
     hubSub.setAttribute("text-anchor","middle"); hubSub.setAttribute("dominant-baseline","central");
-    hubSub.style.cssText = "font-size:9px;font-family:var(--font-sans);fill:var(--text-secondary)";
+    hubSub.style.cssText = "font-size:9px;font-family:var(--font-wheel);fill:var(--text-secondary)";
     hubSub.textContent = data.hub.subBefore;
-    svgEl.appendChild(hubSub);
+    hubGroup.appendChild(hubSub);
   }
 
-  // divider between the App half and the resources half
+  // Internal Resources / Partnerships detail -- collapsed by default so the
+  // hub reads as just "Dream App" at rest; a small toggle beneath the logo
+  // reveals the two columns (and the ring tone behind them) on click.
+  const hubDetail = document.createElementNS(svgns,"g");
+  hubDetail.setAttribute("id", (interactive ? "roadmap" : "restructure") + "-hub-detail");
+  hubDetail.style.cssText = "opacity:0;pointer-events:none;transition:opacity .3s";
+  hubGroup.appendChild(hubDetail);
+
   const hubDivider = document.createElementNS(svgns,"line");
   hubDivider.setAttribute("x1","200"); hubDivider.setAttribute("y1","340"); hubDivider.setAttribute("x2","480"); hubDivider.setAttribute("y2","340");
-  hubDivider.setAttribute("stroke","rgba(66,45,35,.24)"); hubDivider.setAttribute("stroke-width","1.2");
-  svgEl.appendChild(hubDivider);
+  hubDivider.setAttribute("stroke","var(--wheel-dormant-stroke)"); hubDivider.setAttribute("stroke-width","1");
+  hubDetail.appendChild(hubDivider);
   const colDivider = document.createElementNS(svgns,"line");
   colDivider.setAttribute("x1","340"); colDivider.setAttribute("y1","350"); colDivider.setAttribute("x2","340"); colDivider.setAttribute("y2","422");
-  colDivider.setAttribute("stroke","rgba(66,45,35,.18)"); colDivider.setAttribute("stroke-width","1");
-  svgEl.appendChild(colDivider);
+  colDivider.setAttribute("stroke","var(--wheel-dormant-stroke)"); colDivider.setAttribute("stroke-width","0.75");
+  hubDetail.appendChild(colDivider);
 
   // bottom half, left column: Internal Resources (reuses the org chart's shared-resources list)
   const colTitle = (x, label) => {
     const t = document.createElementNS(svgns,"text");
     t.setAttribute("x", x); t.setAttribute("y", "358");
     t.setAttribute("text-anchor","middle"); t.setAttribute("dominant-baseline","central");
-    t.style.cssText = "font-size:9px;font-weight:700;letter-spacing:.3px;text-transform:uppercase;font-family:var(--font-sans);fill:var(--text-primary)";
+    t.style.cssText = "font-size:9px;font-weight:700;letter-spacing:.3px;text-transform:uppercase;font-family:var(--font-wheel);fill:var(--text-primary)";
     t.textContent = label;
-    svgEl.appendChild(t);
+    hubDetail.appendChild(t);
   };
   colTitle(270, "Internal Resources");
   data.orgChart.shared.forEach((item, i) => {
     const t = document.createElementNS(svgns,"text");
     t.setAttribute("x","270"); t.setAttribute("y", 376 + i*12);
     t.setAttribute("text-anchor","middle"); t.setAttribute("dominant-baseline","central");
-    t.style.cssText = "font-size:9.5px;font-family:var(--font-sans);fill:var(--text-secondary)";
+    t.style.cssText = "font-size:9.5px;font-family:var(--font-wheel);fill:var(--text-secondary)";
     t.textContent = item;
-    svgEl.appendChild(t);
+    hubDetail.appendChild(t);
   });
 
   // bottom half, right column: Partnerships Engine, with Dream Ventures underneath.
@@ -571,15 +583,33 @@ function renderWheelSVG(svgEl, data, mode) {
   const venturesTitle = document.createElementNS(svgns,"text");
   venturesTitle.setAttribute("x","410"); venturesTitle.setAttribute("y","382");
   venturesTitle.setAttribute("text-anchor","middle"); venturesTitle.setAttribute("dominant-baseline","central");
-  venturesTitle.style.cssText = "font-size:11px;font-weight:700;font-style:italic;font-family:var(--font-serif);fill:var(--text-primary)";
+  venturesTitle.style.cssText = "font-size:11px;font-weight:700;font-style:italic;font-family:var(--font-wheel);fill:var(--text-primary)";
   venturesTitle.textContent = "Dream Ventures";
-  svgEl.appendChild(venturesTitle);
+  hubDetail.appendChild(venturesTitle);
   const venturesSub = document.createElementNS(svgns,"text");
   venturesSub.setAttribute("x","410"); venturesSub.setAttribute("y","396");
   venturesSub.setAttribute("text-anchor","middle"); venturesSub.setAttribute("dominant-baseline","central");
-  venturesSub.style.cssText = "font-size:7.5px;font-family:var(--font-sans);fill:var(--text-secondary)";
+  venturesSub.style.cssText = "font-size:7.5px;font-family:var(--font-wheel);fill:var(--text-secondary)";
   venturesSub.textContent = "invests in outside startups";
-  svgEl.appendChild(venturesSub);
+  hubDetail.appendChild(venturesSub);
+
+  // Small "tap to expand" affordance, sitting just under the App logo/tag.
+  const hubToggleHint = document.createElementNS(svgns,"text");
+  hubToggleHint.setAttribute("id", (interactive ? "roadmap" : "restructure") + "-hub-toggle-hint");
+  hubToggleHint.setAttribute("x","340"); hubToggleHint.setAttribute("y", interactive ? hubLogoBottom + 46 : 300);
+  hubToggleHint.setAttribute("text-anchor","middle"); hubToggleHint.setAttribute("dominant-baseline","central");
+  hubToggleHint.style.cssText = "font-size:9px;font-weight:700;letter-spacing:.4px;font-family:var(--font-wheel);fill:var(--text-muted)";
+  hubToggleHint.textContent = "+ Internal resources & partnerships";
+  hubGroup.appendChild(hubToggleHint);
+
+  let hubExpanded = false;
+  hubGroup.addEventListener("click", () => {
+    hubExpanded = !hubExpanded;
+    hubBase.setAttribute("fill", hubExpanded ? "var(--wheel-ring-fill)" : "var(--wheel-core-fill)");
+    hubDetail.style.opacity = hubExpanded ? "1" : "0";
+    hubDetail.style.pointerEvents = hubExpanded ? "auto" : "none";
+    hubToggleHint.textContent = hubExpanded ? "− Hide detail" : "+ Internal resources & partnerships";
+  });
 
   // The four pillar logos, every one drawn at the same fixed height
   // (PILLAR_LOGO_H) so none reads bigger or smaller than another. Static
@@ -603,7 +633,7 @@ function renderWheelSVG(svgEl, data, mode) {
       sub.setAttribute("id", w.key+"-sub");
       sub.setAttribute("x", w.lx); sub.setAttribute("y", logoCenterY - dims.h/2 - 12);
       sub.setAttribute("text-anchor","middle"); sub.setAttribute("dominant-baseline","central");
-      sub.style.cssText = "font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;font-family:var(--font-sans);fill:var(--text-secondary)";
+      sub.style.cssText = "font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;font-family:var(--font-wheel);fill:var(--text-secondary)";
       sub.textContent = div.sub || "";
       svgEl.appendChild(sub);
     });
@@ -635,7 +665,7 @@ function buildWheel(container, data) {
     c.setAttribute("id","stop-"+p.phase); c.setAttribute("cx", x); c.setAttribute("cy", 40); c.setAttribute("r", 7);
     const t = document.createElementNS(svgns, "text");
     t.setAttribute("x", x); t.setAttribute("y", 66); t.setAttribute("text-anchor","middle");
-    t.setAttribute("style","font-size:12px;font-family:var(--font-sans);fill:var(--text-muted)"); t.textContent = p.range;
+    t.setAttribute("style","font-size:12px;font-family:var(--font-wheel);fill:var(--text-muted)"); t.textContent = p.range;
     tlSvg.appendChild(c); tlSvg.appendChild(t);
   });
   container.appendChild(tlSvg);
