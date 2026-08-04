@@ -1054,14 +1054,17 @@ function buildOrgChart(container, data) {
   line(CX, groupY + topH/2, CX, sharedTop);
   box(CX, groupY, topW, topH, o.group);
 
+  // Dashed box hugs just the pills themselves (equal margin both sides),
+  // not the full width of the business row below -- it was stretching all
+  // the way to leftEdge/rightEdge, way past the last pill.
+  const pillW = 130, pillGap = 16, pillMargin = 32;
+  const pillsTotal = o.shared.length * pillW + (o.shared.length - 1) * pillGap;
   const sharedRect = document.createElementNS(svgns, "rect");
-  sharedRect.setAttribute("x", leftEdge); sharedRect.setAttribute("y", sharedTop);
-  sharedRect.setAttribute("width", rightEdge - leftEdge); sharedRect.setAttribute("height", sharedH);
+  sharedRect.setAttribute("x", CX - pillsTotal/2 - pillMargin); sharedRect.setAttribute("y", sharedTop);
+  sharedRect.setAttribute("width", pillsTotal + pillMargin*2); sharedRect.setAttribute("height", sharedH);
   sharedRect.setAttribute("rx", 14); sharedRect.setAttribute("fill", "var(--surface-1)");
   sharedRect.setAttribute("stroke", "var(--border-strong)"); sharedRect.setAttribute("stroke-dasharray", "5 4");
   svg.appendChild(sharedRect);
-  const pillW = 130, pillGap = 16;
-  const pillsTotal = o.shared.length * pillW + (o.shared.length - 1) * pillGap;
   let pillX = CX - pillsTotal/2 + pillW/2;
   o.shared.forEach(s => {
     box(pillX, sharedTop + sharedH/2, pillW, 40, s, { fill: "rgba(66,45,35,.7)", fontSize: 12 });
