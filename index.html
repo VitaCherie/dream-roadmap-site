@@ -1023,7 +1023,7 @@ function buildOrgChart(container, data) {
   const leftEdge = Math.min(...colXs) - 85, rightEdge = Math.max(...colXs) + 85;
   const boxW = 170, boxH = 48, topW = 170, topH = 44;
 
-  const groupY = 30, boardY = 100, ceoY = 170;
+  const groupY = 100;
   const sharedTop = 218, sharedH = 100, sharedBottom = sharedTop + sharedH;
   const busY = 358;
   const bizTop = 398, bizCenterY = bizTop + boxH / 2;
@@ -1062,12 +1062,8 @@ function buildOrgChart(container, data) {
     return { top: y - h/2, bottom: y + h/2 };
   };
 
-  line(CX, groupY + topH/2, CX, boardY - topH/2);
-  line(CX, boardY + topH/2, CX, ceoY - topH/2);
-  line(CX, ceoY + topH/2, CX, sharedTop);
+  line(CX, groupY + topH/2, CX, sharedTop);
   box(CX, groupY, topW, topH, o.group);
-  box(CX, boardY, topW, topH, o.board);
-  box(CX, ceoY, topW, topH, o.ceo);
 
   const sharedRect = document.createElementNS(svgns, "rect");
   sharedRect.setAttribute("x", leftEdge); sharedRect.setAttribute("y", sharedTop);
